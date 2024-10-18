@@ -3,6 +3,7 @@ library stacked_trio_carousel;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'stacked_trio_carousel_controller.dart';
 
 enum _SwipingMethod {
   animationDriven,
@@ -10,23 +11,24 @@ enum _SwipingMethod {
 }
 
 class StackedTrioCarousel extends StatefulWidget {
-  const StackedTrioCarousel(
-      {super.key,
-      required this.background,
-      required this.cardHeight,
-      required this.cardWidth,
-      required this.children,
-      this.scaleRatio = 0.7,
-      this.minimumOpacity = 0.2,
-      this.maximumOpacity = 1,
-      this.animationDuration = const Duration(milliseconds: 500),
-      this.durationBetweenAnimations = const Duration(seconds: 7),
-      this.appearDuration = const Duration(milliseconds: 275),
-      this.disappearDuration = const Duration(milliseconds: 50),
-      this.padding = EdgeInsets.zero,
-      this.isAnimated = true,
-      this.routeObserver})
-      : assert(scaleRatio > 0 && scaleRatio < 1,
+  const StackedTrioCarousel({
+    super.key,
+    required this.background,
+    required this.cardHeight,
+    required this.cardWidth,
+    required this.children,
+    this.scaleRatio = 0.7,
+    this.minimumOpacity = 0.2,
+    this.maximumOpacity = 1,
+    this.animationDuration = const Duration(milliseconds: 500),
+    this.durationBetweenAnimations = const Duration(seconds: 7),
+    this.appearDuration = const Duration(milliseconds: 275),
+    this.disappearDuration = const Duration(milliseconds: 50),
+    this.padding = EdgeInsets.zero,
+    this.isAnimated = true,
+    this.routeObserver,
+    this.controller,
+  })  : assert(scaleRatio > 0 && scaleRatio < 1,
             "Scale ratio should be greater than 0 and smaller than 1"),
         assert(minimumOpacity >= 0 && minimumOpacity <= 1,
             "Minimum opacity value should be between 0 and 1"),
@@ -34,8 +36,7 @@ class StackedTrioCarousel extends StatefulWidget {
             "Maximum opacity value should be between 0 and 1"),
         assert(maximumOpacity > minimumOpacity,
             "Maximum opacity value should be bigger than minimum opacity value"),
-        assert(children.length == 3,
-            "the children list should contain exactly 3 items."),
+        assert(children.length == 3, "the children list should contain exactly 3 items."),
         assert(durationBetweenAnimations >= animationDuration,
             "the duration between animations should be equal to or greater than the animation duration");
 
@@ -128,6 +129,8 @@ class StackedTrioCarousel extends StatefulWidget {
   /// navigating back.This will only take effect if a `routeObserver` is provided.
   final Duration appearDuration;
 
+  final StackedTrioCarouselController? controller;
+
   @override
   State<StackedTrioCarousel> createState() => _StackedTrioCarouselState();
 }
@@ -182,6 +185,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
 
   @override
   void initState() {
+    widget.controller?.addListener(_onControllerUpdated);
+
     _children = List.from(widget.children);
 
     // intial the swip method based on isAnimated value
@@ -191,10 +196,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
       _swipingMethod = _SwipingMethod.userDriven;
     }
 
-    _animationController =
-        AnimationController(vsync: this, duration: widget.animationDuration)
-          ..addStatusListener(_animationStatusListener)
-          ..addListener(_animationListener);
+    _animationController = AnimationController(vsync: this, duration: widget.animationDuration)
+      ..addStatusListener(_animationStatusListener)
+      ..addListener(_animationListener);
 
     // ensure the widget has been rendered
     WidgetsBinding.instance.addPostFrameCallback(
@@ -207,8 +211,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
 
         // calculating the card Y offset based on the widget offset,the center of
         // the widget and the height of the card
-        _verticalStartingPoint =
-            offset.dy + centerPoint - widget.cardHeight / 2;
+        _verticalStartingPoint = offset.dy + centerPoint - widget.cardHeight / 2;
 
         _generatePositionAnimations(offset.dx, size.width);
 
@@ -224,8 +227,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
             const Duration(seconds: 2),
             () {
               _animationController.forward();
-              _timer =
-                  Timer.periodic(widget.durationBetweenAnimations, (timer) {
+              _timer = Timer.periodic(widget.durationBetweenAnimations, (timer) {
                 _animationController.forward();
               });
             },
@@ -253,30 +255,26 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
 
     // Update the children list if it has changed
     if (widget.children != oldWidget.children) {
-      _children = List.from(widget
-          .children); // Create a new list of children from the updated widget
+      _children =
+          List.from(widget.children); // Create a new list of children from the updated widget
     }
 
     // Check if the animation duration has changed
     if ((widget.animationDuration != oldWidget.animationDuration)) {
       _animationController.stop(); // Stop the current animation
       // Reinitialize the animation controller with the new duration
-      _animationController =
-          AnimationController(vsync: this, duration: widget.animationDuration)
-            ..addStatusListener(
-                _animationStatusListener) // Re-add the status listener
-            ..addListener(_animationListener); // Re-add the animation listener
+      _animationController = AnimationController(vsync: this, duration: widget.animationDuration)
+        ..addStatusListener(_animationStatusListener) // Re-add the status listener
+        ..addListener(_animationListener); // Re-add the animation listener
     }
 
     // Check if the duration between animations has changed
-    if (widget.durationBetweenAnimations !=
-        oldWidget.durationBetweenAnimations) {
+    if (widget.durationBetweenAnimations != oldWidget.durationBetweenAnimations) {
       if (widget.isAnimated) {
         _timer?.cancel(); // Cancel any existing timer
         // Create a new periodic timer for the new duration
         _timer = Timer.periodic(widget.durationBetweenAnimations, (timer) {
-          _animationController
-              .forward(); // Move the animation forward at each interval
+          _animationController.forward(); // Move the animation forward at each interval
         });
       }
     }
@@ -287,8 +285,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
         _timer?.cancel(); // Cancel any existing timer
         // Create a new periodic timer for the new duration
         _timer = Timer.periodic(widget.durationBetweenAnimations, (timer) {
-          _animationController
-              .forward(); // Move the animation forward at each interval
+          _animationController.forward(); // Move the animation forward at each interval
         });
         _animationController.forward(); // Start the animation immediately
       } else {
@@ -313,11 +310,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
       final centerPoint = size.height / 2; // Center point of the height
       _verticalStartingPoint = offset.dy + centerPoint - widget.cardHeight / 2;
 
-      bool overliesMounted =
-          true; // Flag to check if overlay entries are still mounted
+      bool overliesMounted = true; // Flag to check if overlay entries are still mounted
       for (var entry in _overlayEntries) {
-        overliesMounted =
-            entry.mounted; // Update the flag based on entry's mount status
+        overliesMounted = entry.mounted; // Update the flag based on entry's mount status
         if (entry.mounted) {
           entry.remove(); // Remove mounted overlay entries
         }
@@ -331,8 +326,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
 
   @override
   void didChangeDependencies() {
-    super
-        .didChangeDependencies(); // Call the superclass method to ensure proper initialization
+    super.didChangeDependencies(); // Call the superclass method to ensure proper initialization
     // Subscribe to the route observer if it is provided
     if (widget.routeObserver != null) {
       widget.routeObserver?.subscribe(this, ModalRoute.of(context)!);
@@ -344,6 +338,14 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     // Unsubscribe from the route observer if it is provided to avoid memory leaks
     if (widget.routeObserver != null) {
       widget.routeObserver?.unsubscribe(this);
+    }
+    widget.controller?.removeListener(_onControllerUpdated);
+    for (var entry in _overlayEntries) {
+      try {
+        if (entry.mounted) {
+          entry.remove(); // Remove mounted overlay entries
+        } // Remove each overlay entry from the overlay
+      } catch (_) {}
     }
     super.dispose(); // Call the superclass dispose method
   }
@@ -357,8 +359,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
         for (var entry in _overlayEntries) {
           if (mounted) {
             // Check if the widget is still in the widget tree
-            Overlay.of(context)
-                .insert(entry); // Re-insert each overlay entry into the overlay
+            Overlay.of(context).insert(entry); // Re-insert each overlay entry into the overlay
           }
         }
       },
@@ -369,17 +370,54 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   void didPushNext() {
     // Handle the event when this widget is pushed off the screen
     Future.delayed(
-      widget
-          .disappearDuration, // Wait for the specified duration before disappearing
+      widget.disappearDuration, // Wait for the specified duration before disappearing
       () {
         for (var entry in _overlayEntries) {
-          entry.remove(); // Remove each overlay entry from the overlay
+          if (entry.mounted) {
+            entry.remove(); // Remove mounted overlay entries
+          } // Remove each overlay entry from the overlay
         }
       },
     );
 
-    super
-        .didPushNext(); // Call the superclass method to ensure proper functionality
+    super.didPushNext(); // Call the superclass method to ensure proper functionality
+  }
+
+  void _onControllerUpdated() {
+    if (widget.controller!.isVisible) {
+      if (!_isFutureRegistered) {
+        _isFutureRegistered = true;
+        Future.delayed(
+          const Duration(seconds: 5), // Delay before starting the animation
+          () {
+            if (!_stopTimer) {
+              _animationController.forward(); // Start animation
+              // Set up periodic timer to continue animating
+              _timer = Timer.periodic(widget.durationBetweenAnimations, (timer) {
+                _animationController.forward();
+              });
+            }
+            _isFutureRegistered = false; // Reset future registration flag
+          },
+        );
+      }
+      for (var entry in _overlayEntries) {
+        if (mounted) {
+          // Check if the widget is still in the widget tree
+          Overlay.of(context).insert(entry); // Re-insert each overlay entry into the overlay
+        }
+      }
+    } else {
+      _animationController.reset();
+      _animationController.stop();
+      _timer?.cancel(); // Cancel the timer if animation is disabled
+      _timer = null; // Set timer to null
+      for (var entry in _overlayEntries) {
+        if (entry.mounted) {
+          entry.remove(); // Remove mounted overlay entries
+        } // Remove each overlay entry from the overlay
+      }
+    }
   }
 
   /// Listens for changes in the animation and adjusts the overlay entries accordingly
@@ -393,7 +431,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
           if (!_hasPassedMid) {
             // Remove all overlay entries to prepare for re-insertion
             for (var entry in _overlayEntries) {
-              entry.remove();
+              if (entry.mounted) {
+                entry.remove(); // Remove mounted overlay entries
+              }
             }
             _hasPassedMid = true; // Mark that we've passed the midpoint
             // Reinsert the overlay entries in a new order for a smooth transition
@@ -412,7 +452,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
             // Change order of overlay entries when swiping forward past the midpoint
             if (!_hasPassedMid) {
               for (var entry in _overlayEntries) {
-                entry.remove(); // Remove all entries for reordering
+                if (entry.mounted) {
+                  entry.remove(); // Remove mounted overlay entries
+                } // Remove all entries for reordering
               }
               _hasPassedMid = true; // Mark that we've passed the midpoint
               // Reinsert the overlay entries in a new order
@@ -427,13 +469,17 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
             // Change order of overlay entries when swiping backward past the midpoint
             if (!_hasPassedMid) {
               for (var entry in _overlayEntries) {
-                entry.remove(); // Remove all entries for reordering
+                if (entry.mounted) {
+                  entry.remove(); // Remove mounted overlay entries
+                } // Remove all entries for reordering
               }
               _hasPassedMid = true; // Mark that we've passed the midpoint
               // Reinsert the overlay entries in a new order
-              Overlay.of(context).insert(_overlayEntries.first);
-              Overlay.of(context).insert(_overlayEntries[1]);
-              Overlay.of(context).insert(_overlayEntries.last);
+              try {
+                Overlay.of(context).insert(_overlayEntries.first);
+                Overlay.of(context).insert(_overlayEntries[1]);
+                Overlay.of(context).insert(_overlayEntries.last);
+              } catch (_) {}
             }
           }
         }
@@ -471,7 +517,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   // proper animation after resetting the animation controller.
   void _rearrangeStackedCards() {
     for (var entry in _overlayEntries) {
-      entry.remove();
+      if (entry.mounted) {
+        entry.remove(); // Remove mounted overlay entries
+      }
     }
 
     _children.insert(0, _children.removeLast());
@@ -486,10 +534,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     _overlayEntries.clear(); // Clear existing overlay entries
     for (int i = 0; i < _positionAnimations.length; i++) {
       // Create and add overlay entries for each card based on position, opacity, scale, and child widget
-      _overlayEntries.add(_createOverlayEntry(_positionAnimations[i],
-          _opacityAnimations[i], _scaleAnimations[i], _children[i]));
-      Overlay.of(context).insert(
-          _overlayEntries[i]); // Insert the overlay into the overlay stack
+      _overlayEntries.add(_createOverlayEntry(
+          _positionAnimations[i], _opacityAnimations[i], _scaleAnimations[i], _children[i]));
+      Overlay.of(context).insert(_overlayEntries[i]); // Insert the overlay into the overlay stack
     }
   }
 
@@ -512,14 +559,11 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   void _generateScaleAnimations() {
     _scaleAnimations = [
       // Tween for maintaining the scale ratio
-      Tween<double>(begin: widget.scaleRatio, end: widget.scaleRatio)
-          .animate(_animationController),
+      Tween<double>(begin: widget.scaleRatio, end: widget.scaleRatio).animate(_animationController),
       // Tween for scaling from the scale ratio to the default size (1)
-      Tween<double>(begin: widget.scaleRatio, end: 1)
-          .animate(_animationController),
+      Tween<double>(begin: widget.scaleRatio, end: 1).animate(_animationController),
       // Tween for scaling back from the default size (1) to the scale ratio
-      Tween<double>(begin: 1, end: widget.scaleRatio)
-          .animate(_animationController),
+      Tween<double>(begin: 1, end: widget.scaleRatio).animate(_animationController),
     ];
   }
 
@@ -527,19 +571,13 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   void _generatePositionAnimations(double xStartPoint, double parentWidth) {
     _positionAnimations = [
       // Tween for moving the first card from its starting position to the second card's position
-      Tween(
-              begin: _firstCardPosition(xStartPoint),
-              end: _secondCardPosition(parentWidth))
+      Tween(begin: _firstCardPosition(xStartPoint), end: _secondCardPosition(parentWidth))
           .animate(_animationController),
       // Tween for moving the second card from its position to the third card's position
-      Tween(
-              begin: _secondCardPosition(parentWidth),
-              end: _thirdCardPosition(parentWidth))
+      Tween(begin: _secondCardPosition(parentWidth), end: _thirdCardPosition(parentWidth))
           .animate(_animationController),
       // Tween for moving the third card from its position back to the first card's position
-      Tween(
-              begin: _thirdCardPosition(parentWidth),
-              end: _firstCardPosition(xStartPoint))
+      Tween(begin: _thirdCardPosition(parentWidth), end: _firstCardPosition(xStartPoint))
           .animate(_animationController)
     ];
   }
@@ -548,8 +586,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   double _firstCardPosition(double xPoint) {
     return xPoint -
         ((widget.cardWidth - widget.cardWidth * widget.scaleRatio) / 2) +
-        widget.padding
-            .horizontal; // Adjust position based on scale ratio and padding
+        widget.padding.horizontal; // Adjust position based on scale ratio and padding
   }
 
   /// Calculates the position of the second card based on the parent width and widget properties.
@@ -557,14 +594,12 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     return width -
         (widget.cardWidth * widget.scaleRatio +
             ((widget.cardWidth - widget.cardWidth * widget.scaleRatio) / 2)) -
-        widget.padding
-            .horizontal; // Adjust position based on scale ratio and padding
+        widget.padding.horizontal; // Adjust position based on scale ratio and padding
   }
 
   /// Calculates the position of the third card to center it in the parent width.
   double _thirdCardPosition(double width) {
-    return (width / 2) -
-        (widget.cardWidth / 2); // Center the card within the parent width
+    return (width / 2) - (widget.cardWidth / 2); // Center the card within the parent width
   }
 
   /// Creates an OverlayEntry for a stacked card with animations
@@ -582,8 +617,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
             height: widget.cardHeight, // Set the height of the card
             width: widget.cardWidth, // Set the width of the card
             top: _verticalStartingPoint, // Set the vertical position
-            left: animation
-                .value, // Set the horizontal position based on animation value
+            left: animation.value, // Set the horizontal position based on animation value
             child: Opacity(
               opacity: opacity.value!, // Set the opacity based on animation
               child: Transform.scale(
@@ -593,12 +627,10 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
                   child: GestureDetector(
                     onPanDown: _onPanDown, // Handle touch down event
                     onPanUpdate: _onPanUpdate, // Handle touch movement
-                    onPanCancel:
-                        _onPanCancel, // Handle cancellation of the gesture
+                    onPanCancel: _onPanCancel, // Handle cancellation of the gesture
                     onPanEnd: _onPanEnd, // Handle end of the gesture
                     child: IgnorePointer(
-                        ignoring: child != _children.last &&
-                            _animationController.value != 1,
+                        ignoring: child != _children.last && _animationController.value != 1,
                         child: child // Display the child widget
                         ),
                   ),
@@ -622,18 +654,16 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
         (value) {
           _hasPassedMid = false; // Reset mid-swipe state
           // Determine if the swipe method was animation or user-driven
-          _swipingMethod = widget.isAnimated
-              ? _SwipingMethod.animationDriven
-              : _SwipingMethod.userDriven;
+          _swipingMethod =
+              widget.isAnimated ? _SwipingMethod.animationDriven : _SwipingMethod.userDriven;
         },
       );
     } else if (_animationController.value < 0.5) {
       _animationController.animateTo(0).then(
         (value) {
           _hasPassedMid = false; // Reset mid-swipe state
-          _swipingMethod = widget.isAnimated
-              ? _SwipingMethod.animationDriven
-              : _SwipingMethod.userDriven;
+          _swipingMethod =
+              widget.isAnimated ? _SwipingMethod.animationDriven : _SwipingMethod.userDriven;
         },
       );
     }
@@ -650,8 +680,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
             if (!_stopTimer) {
               _animationController.forward(); // Start animation
               // Set up periodic timer to continue animating
-              _timer =
-                  Timer.periodic(widget.durationBetweenAnimations, (timer) {
+              _timer = Timer.periodic(widget.durationBetweenAnimations, (timer) {
                 _animationController.forward();
               });
             }
@@ -668,9 +697,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     _cardSwapped = false; // Reset card swapped state
 
     // Determine the swiping method based on whether animations are enabled
-    _swipingMethod = widget.isAnimated
-        ? _SwipingMethod.animationDriven
-        : _SwipingMethod.userDriven;
+    _swipingMethod = widget.isAnimated ? _SwipingMethod.animationDriven : _SwipingMethod.userDriven;
 
     // If animations are enabled, set up a periodic timer
     if (widget.isAnimated) {
@@ -683,8 +710,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   /// Handles the update of a swipe gesture
   void _onPanUpdate(DragUpdateDetails details) {
     _animationController.stop(); // Stop the current animation
-    _swipingMethod =
-        _SwipingMethod.userDriven; // Set swiping method to user-driven
+    _swipingMethod = _SwipingMethod.userDriven; // Set swiping method to user-driven
 
     // Determine swipe direction and update state
     if (_isSwipingforward != details.delta.dx < 0) {
@@ -700,11 +726,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     // If the swiping has started, update the animation controller value
     if (_startSwiping) {
       if (!_cardSwapped) {
-        double value = 1 -
-            (details.localPosition.dx /
-                widget.cardWidth); // Calculate new animation value
-        _animationController.value =
-            value.clamp(0, 1); // Clamp value between 0 and 1
+        double value =
+            1 - (details.localPosition.dx / widget.cardWidth); // Calculate new animation value
+        _animationController.value = value.clamp(0, 1); // Clamp value between 0 and 1
       }
     }
   }
@@ -716,7 +740,6 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
       _timer!.cancel();
       _timer = null; // Clear the timer
     }
-
     _animationController.stop(); // Stop the current animation
     _cardSwapped = false; // Reset card swapped state
     _hasPassedMid = false; // Reset mid-swipe state

@@ -168,6 +168,32 @@ routeObserver: routeObserver,
   <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/navigation_2.gif" width="300"/>
 </div>
 
+### Add controller 
+
+```dart
+final StackedTrioCarouselController _carouselController = StackedTrioCarouselController();
+```
+
+```dart
+controller: _carouselController,
+```
+hide and show the carousel based on visibility 
+```dart
+ElevatedButton(
+  onPressed: () {
+    if (_carouselController.isVisible) {
+      _carouselController.hide();
+    } else {
+      _carouselController.show();
+    }
+    setState(() {});
+  },
+  child: Text(_carouselController.isVisible ? "Hide" : "Show", style: const TextStyle(color: Colors.black)),
+)
+```
+<div style="display: flex; justify-content: space-around;">
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/controller.gif" width="300"/>
+</div>
 
 ## Example
 
