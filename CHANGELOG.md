@@ -13,3 +13,7 @@
 ## 0.0.4
 
 * ADD stacked trio carousel controller 
+
+## 0.0.5
+
+* Fix Bugs

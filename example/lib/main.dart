@@ -37,7 +37,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final List _color = [Colors.red, Colors.green, Colors.blue];
 
-  final StackedTrioCarouselController _carouselController = StackedTrioCarouselController();
+  final StackedTrioCarouselController _carouselController =
+      StackedTrioCarouselController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,7 +88,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
                 setState(() {});
               },
-              child: Text(_carouselController.isVisible ? "Hide" : "Show", style: const TextStyle(color: Colors.black)),
+              child: Text(_carouselController.isVisible ? "Hide" : "Show",
+                  style: const TextStyle(color: Colors.black)),
             )
           ],
         ),
