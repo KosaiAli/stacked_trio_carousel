@@ -17,3 +17,7 @@
 ## 0.0.5
 
 * Fix Bugs
+
+## 1.0.0
+
+* Animation Logic Moved to Controller

@@ -34,11 +34,21 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   final List _color = [Colors.red, Colors.green, Colors.blue];
 
-  final StackedTrioCarouselController _carouselController =
-      StackedTrioCarouselController();
+  late StackedTrioCarouselController _carouselController;
+
+  @override
+  void initState() {
+    _carouselController = StackedTrioCarouselController(
+        tickerProvider: this,
+        animationDuration: const Duration(milliseconds: 200),
+        autoPlayInterval: const Duration(seconds: 1),
+        autoPlay: false);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,12 +62,13 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             StackedTrioCarousel(
               background: Container(),
-              cardHeight: 200,
-              cardWidth: 200,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              params: StackedTrioCarouselParams(
+                cardHeight: 200,
+                cardWidth: 200,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+              ),
               routeObserver: routeObserver,
               controller: _carouselController,
-              durationBetweenAnimations: const Duration(seconds: 2),
               children: _color
                   .map(
                     (color) => GestureDetector(
@@ -81,15 +92,17 @@ class _MyHomePageState extends State<MyHomePage> {
             const SizedBox(height: 200),
             ElevatedButton(
               onPressed: () {
-                if (_carouselController.isVisible) {
-                  _carouselController.hide();
-                } else {
-                  _carouselController.show();
-                }
+                _carouselController.autoPlay
+                    ? _carouselController.stopAutoPlay()
+                    : _carouselController.startAutoPlay();
                 setState(() {});
               },
-              child: Text(_carouselController.isVisible ? "Hide" : "Show",
-                  style: const TextStyle(color: Colors.black)),
+              child: Text(
+                _carouselController.autoPlay
+                    ? "Stop Auto Play"
+                    : "Start Auto Play",
+                style: const TextStyle(color: Colors.black),
+              ),
             )
           ],
         ),
