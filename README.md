@@ -14,7 +14,7 @@ To use this package, add `stacked_trio_carousel` as a dependency in your `pubspe
 
 ```yaml
 dependencies:
-  stacked_trio_carousel: ^0.0.1
+  stacked_trio_carousel: ^1.0.1
 ```
 
 ## Usage
