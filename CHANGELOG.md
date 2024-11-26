@@ -21,3 +21,7 @@
 ## 1.0.0
 
 * Animation Logic Moved to Controller
+
+## 1.0.1
+
+* Update README.md
