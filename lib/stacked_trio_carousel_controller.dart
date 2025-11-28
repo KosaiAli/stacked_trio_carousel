@@ -76,7 +76,7 @@ class StackedTrioCarouselController {
   /// Getter for whether auto-play is active
   bool get autoPlay => _autoPlay;
 
-  get isAnimationCompleted =>
+  bool get isAnimationCompleted =>
       _animationController.status == AnimationStatus.completed;
 
   /// Constructor for the controller
@@ -132,7 +132,7 @@ class StackedTrioCarouselController {
   }
 
   /// Listener for animation status changes
-  void animationStatusListener(status) {
+  void animationStatusListener(AnimationStatus status) {
     if (status == AnimationStatus.forward) {
       onAnimationStart?.call();
     } else if (status == AnimationStatus.completed) {

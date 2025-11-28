@@ -1,4 +1,4 @@
-library stacked_trio_carousel;
+library;
 
 import 'dart:async';
 
@@ -257,7 +257,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   }
 
   /// Handles the end of a swipe gesture
-  void _onPanEnd(details) {
+  void _onPanEnd(DragEndDetails details) {
     _controller.onUserInteractionEnd();
   }
 
@@ -272,7 +272,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   }
 
   /// Handles the start of a swipe gesture
-  void _onPanDown(_) {
+  void _onPanDown(DragDownDetails _) {
     _controller.onUserInteractionStart();
   }
 

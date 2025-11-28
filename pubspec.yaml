@@ -1,6 +1,6 @@
 name: stacked_trio_carousel
 description: "A flutter package provides a visually engaging card carousel with a stacked layout of three cards."
-version: 1.0.1
+version: 1.0.2
 homepage: https://github.com/KosaiAli/stacked_trio_carousel.git
 repository: https://github.com/KosaiAli/stacked_trio_carousel.git
 
@@ -15,6 +15,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
+  lints: ^6.0.0
 
 flutter:
