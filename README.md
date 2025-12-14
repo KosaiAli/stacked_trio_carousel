@@ -5,8 +5,9 @@
 ## Features
 
 The carousel features one prominent card in the foreground and two cards in the background, making it perfect for showcasing content in a layered and dynamic way. With built-in animations and customizable properties, users can swipe through the cards or enable automatic transitions for a smooth and interactive experience.
+s
 
-<img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif"/>
+<img src="./doc/default.gif" width="300"/>
 
 ## Getting Started
 
@@ -74,8 +75,8 @@ StackedTrioCarouselParams(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size_1.gif" width="300"/>
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size_2.gif" width="300"/>
+  <img src="./doc/change_size_1.gif" width="300"/>
+  <img src="./doc/change_size_2.gif" width="300"/>
 </div>
 
 ### Add Padding
@@ -91,8 +92,8 @@ StackedTrioCarouselParams(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size_2.gif" width="300"/>
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/padding.gif" width="300"/>
+  <img src="./doc/change_size_2.gif" width="300"/>
+  <img src="./doc/padding.gif" width="300"/>
 </div>
 
 ### Change Scale and Minimum Opacity
@@ -110,8 +111,8 @@ StackedTrioCarouselParams(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/scale_and_opacity_1.gif" width="300"/>
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/scale_and_opacity_2.gif" width="300"/>
+  <img src="./doc/scale_and_opacity_1.gif" width="300"/>
+  <img src="./doc/scale_and_opacity_2.gif" width="300"/>
 </div>
 
 ### Add controller 
@@ -143,8 +144,8 @@ _carouselController = StackedTrioCarouselController(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif" width="300"/>
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/animation_duration.gif" width="300"/>
+  <img src="./doc/default.gif" width="300"/>
+  <img src="./doc/animation_duration.gif" width="300"/>
 </div>
 
 ### Manual Swiping
@@ -152,7 +153,7 @@ _carouselController = StackedTrioCarouselController(
 You can also allow manual swiping:
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/no_animation.gif" width="300"/>
+  <img src="./doc/no_animation.gif" width="300"/>
 </div>
 
 ### Stop Automatic Animation
@@ -225,10 +226,52 @@ routeObserver: routeObserver,
 3. **Perform a hot restart of the application.**
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/navigation_1.gif" width="300"/>
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/navigation_2.gif" width="300"/>
+  <img src="./doc/navigation_1.gif" width="300"/>
+  <img src="./doc/navigation_2.gif" width="300"/>
 </div>
 
+
+### Dynamic Angle 
+
+You should specify a background with a sprcific height and angle for this feature to work
+``` dart
+StackedTrioCarousel(
+  background: Container(
+    height: 400,
+  ),
+  params: StackedTrioCarouselParams(
+    cardHeight: 200,
+    cardWidth: 200,
+    scaleRatio: 0.8,
+    padding: const EdgeInsets.symmetric(horizontal: 0),
+  ),
+  routeObserver: routeObserver,
+  controller: _carouselController,
+  angle: pi / 2,
+  children: _color
+      .map(
+        (color) => GestureDetector(
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SecondScreen(),
+                ));
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(25),
+            ),
+          ),
+        ),
+      ).toList(),
+    ),
+```
+<div style="display: flex; justify-content: space-around;">
+  <img src="./doc/90 degree.gif" width="300"/>
+  <img src="./doc/45 degree.gif" width="300"/>
+</div>
 
 
 ## Example

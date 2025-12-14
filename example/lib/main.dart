@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:stacked_trio_carousel/stacked_trio_carousel.dart';
 import 'package:stacked_trio_carousel/stacked_trio_carousel_controller.dart';
@@ -42,10 +44,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     _carouselController = StackedTrioCarouselController(
-        tickerProvider: this,
-        animationDuration: const Duration(milliseconds: 200),
-        autoPlayInterval: const Duration(seconds: 1),
-        autoPlay: false);
+      tickerProvider: this,
+      animationDuration: const Duration(seconds: 2),
+      autoPlayInterval: const Duration(seconds: 1),
+      autoPlay: true,
+    );
     super.initState();
   }
 
@@ -56,56 +59,52 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            StackedTrioCarousel(
-              background: Container(),
-              params: StackedTrioCarouselParams(
-                cardHeight: 200,
-                cardWidth: 200,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-              ),
-              routeObserver: routeObserver,
-              controller: _carouselController,
-              children: _color
-                  .map(
-                    (color) => GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SecondScreen(),
-                            ));
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: color,
-                          borderRadius: BorderRadius.circular(25),
-                        ),
+      body: Column(
+        children: [
+          StackedTrioCarousel(
+            background: Container(
+              height: 400,
+            ),
+            params: StackedTrioCarouselParams(
+              cardHeight: 200,
+              cardWidth: 200,
+              scaleRatio: 0.8,
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+            ),
+            routeObserver: routeObserver,
+            controller: _carouselController,
+            angle: pi / 4,
+            children: _color
+                .map(
+                  (color) => GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SecondScreen(),
+                          ));
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(25),
                       ),
                     ),
-                  )
-                  .toList(),
+                  ),
+                )
+                .toList(),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _carouselController.autoPlay ? _carouselController.stopAutoPlay() : _carouselController.startAutoPlay();
+              setState(() {});
+            },
+            child: Text(
+              _carouselController.autoPlay ? "Stop Auto Play" : "Start Auto Play",
+              style: const TextStyle(color: Colors.black),
             ),
-            const SizedBox(height: 200),
-            ElevatedButton(
-              onPressed: () {
-                _carouselController.autoPlay
-                    ? _carouselController.stopAutoPlay()
-                    : _carouselController.startAutoPlay();
-                setState(() {});
-              },
-              child: Text(
-                _carouselController.autoPlay
-                    ? "Stop Auto Play"
-                    : "Start Auto Play",
-                style: const TextStyle(color: Colors.black),
-              ),
-            )
-          ],
-        ),
+          )
+        ],
       ),
     );
   }

@@ -29,3 +29,7 @@
 ## 1.0.2 
 
 * Fix analysis warnings and align code with Flutter/Dart linting rules
+
+## 1.0.3 
+
+* Add customizable orientation for items in the carousel

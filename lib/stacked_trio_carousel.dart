@@ -12,6 +12,7 @@ class StackedTrioCarousel extends StatefulWidget {
     required this.background,
     required this.children,
     required this.params,
+    this.angle = 0,
     this.routeObserver,
     this.controller,
   }) : assert(
@@ -51,14 +52,16 @@ class StackedTrioCarousel extends StatefulWidget {
   /// and managed by the widget.
   final StackedTrioCarouselController? controller;
 
+  /// The angle of rotation for items in the carosuel (in radians).
+  ///
+  /// the default is 0 rad
+  final double angle;
+
   @override
   State<StackedTrioCarousel> createState() => _StackedTrioCarouselState();
 }
 
 class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerProviderStateMixin, RouteAware {
-  // The vertical offset of the cards to center them on the background
-  late double _verticalStartingPoint;
-
   // Caching overlay entries to manage their visibility and order
   final List<OverlayEntry> _overlayEntries = [];
 
@@ -86,10 +89,13 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
         final centerPoint = renderBox.size.height / 2;
         final offset = renderBox.localToGlobal(Offset.zero);
 
-        // calculating the card Y offset based on the widget offset,the center of
-        // the widget and the height of the card
-        _verticalStartingPoint = centerPoint - widget.params.cardHeight / 2;
-        _controller.initializeAnimations(widget.params, offset.dx, size.width);
+        _controller.initializeAnimations(
+          params: widget.params,
+          size: size,
+          startPoint: offset,
+          angle: widget.angle,
+          yCenter: centerPoint,
+        );
       } catch (e, st) {
         debugPrint(
           '[StackedTrioCarousel:initState] Failed to initialize layout or animations.\n'
@@ -235,7 +241,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
 
   /// Creates an OverlayEntry for a stacked card with animations
   OverlayEntry _createOverlayEntry(
-    Animation<double?> animation,
+    Animation<Offset?> animation,
     Animation<double?> opacity,
     Animation<double?> scale,
     Widget child,
@@ -250,7 +256,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
             child: CompositedTransformFollower(
               link: layerLink,
               showWhenUnlinked: false,
-              offset: Offset(animation.value!, _verticalStartingPoint),
+              offset: animation.value!,
               child: Opacity(
                 opacity: opacity.value!, // Set the opacity based on animation
                 child: Transform.scale(
@@ -318,24 +324,24 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
 
   void _handleAnimationStart() {}
 
-  void _reinsertOverlayEntries() {
+  void _reinsertOverlayEntries(List<int> order) {
     // Reinserts overlay entries in a new order for a smooth transition
     try {
-      Overlay.of(context).insert(_overlayEntries.first);
+      Overlay.of(context).insert(_overlayEntries[order[0]]);
     } catch (e, st) {
-      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries.first}'
+      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[0]]}'
           'Error: $e\n$st');
     }
     try {
-      Overlay.of(context).insert(_overlayEntries.last);
+      Overlay.of(context).insert(_overlayEntries[order[1]]);
     } catch (e, st) {
-      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries.last}'
+      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[1]]}'
           'Error: $e\n$st');
     }
     try {
-      Overlay.of(context).insert(_overlayEntries[1]);
+      Overlay.of(context).insert(_overlayEntries[order[2]]);
     } catch (e, st) {
-      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[1]}'
+      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[2]]}'
           'Error: $e\n$st');
     }
   }
@@ -355,7 +361,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
               }
             }
 
-            _reinsertOverlayEntries();
+            _reinsertOverlayEntries([0, 2, 1]);
           }
         }
         break;
@@ -373,7 +379,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
                 } // Remove all entries for reordering
               }
 
-              _reinsertOverlayEntries();
+              _reinsertOverlayEntries([0, 2, 1]);
             }
           }
         } else {
@@ -387,7 +393,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
                 } // Remove all entries for reordering
               }
 
-              _reinsertOverlayEntries();
+              _reinsertOverlayEntries([0, 1, 2]);
             }
           }
         }
