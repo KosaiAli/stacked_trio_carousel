@@ -5,9 +5,10 @@
 ## Features
 
 The carousel features one prominent card in the foreground and two cards in the background, making it perfect for showcasing content in a layered and dynamic way. With built-in animations and customizable properties, users can swipe through the cards or enable automatic transitions for a smooth and interactive experience.
-s
 
-<img src="./doc/default.gif" width="300"/>
+<div style="display: flex; justify-content: space-around;">
+<img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif" width="300"/>
+</div>
 
 ## Getting Started
 
@@ -75,8 +76,8 @@ StackedTrioCarouselParams(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="./doc/change_size_1.gif" width="300"/>
-  <img src="./doc/change_size_2.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size_1.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size_2.gif" width="300"/>
 </div>
 
 ### Add Padding
@@ -92,8 +93,8 @@ StackedTrioCarouselParams(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="./doc/change_size_2.gif" width="300"/>
-  <img src="./doc/padding.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size_2.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/padding.gif" width="300"/>
 </div>
 
 ### Change Scale and Minimum Opacity
@@ -111,8 +112,8 @@ StackedTrioCarouselParams(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="./doc/scale_and_opacity_1.gif" width="300"/>
-  <img src="./doc/scale_and_opacity_2.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/scale_and_opacity_1.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/scale_and_opacity_2.gif" width="300"/>
 </div>
 
 ### Add controller 
@@ -144,8 +145,8 @@ _carouselController = StackedTrioCarouselController(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="./doc/default.gif" width="300"/>
-  <img src="./doc/animation_duration.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/animation_duration.gif" width="300"/>
 </div>
 
 ### Manual Swiping
@@ -153,7 +154,7 @@ _carouselController = StackedTrioCarouselController(
 You can also allow manual swiping:
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="./doc/no_animation.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/no_animation.gif" width="300"/>
 </div>
 
 ### Stop Automatic Animation
@@ -226,8 +227,8 @@ routeObserver: routeObserver,
 3. **Perform a hot restart of the application.**
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="./doc/navigation_1.gif" width="300"/>
-  <img src="./doc/navigation_2.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/navigation_1.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/navigation_2.gif" width="300"/>
 </div>
 
 
@@ -269,11 +270,16 @@ StackedTrioCarousel(
     ),
 ```
 <div style="display: flex; justify-content: space-around;">
-  <img src="./doc/90 degree.gif" width="300"/>
-  <img src="./doc/45 degree.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/90 degree.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/45 degree.gif" width="300"/>
 </div>
 
 
-## Example
+
+## **Contributors**
+
+[![GitHub Profile](https://img.shields.io/badge/GitHub-GhassanJar3850-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/GhassanJar3850)
+
+## **Example**
 
 For a full example, check out the [example page](https://pub.dev/packages/stacked_trio_carousel/example).

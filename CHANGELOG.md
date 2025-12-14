@@ -33,3 +33,7 @@
 ## 1.0.3 
 
 * Add customizable orientation for items in the carousel
+
+## 1.0.4
+
+* Update README.md
