@@ -77,7 +77,8 @@ class StackedTrioCarouselController {
   /// Getter for whether auto-play is active
   bool get autoPlay => _autoPlay;
 
-  bool get isAnimationCompleted => _animationController.status == AnimationStatus.completed;
+  bool get isAnimationCompleted =>
+      _animationController.status == AnimationStatus.completed;
 
   /// Constructor for the controller
   /// - [tickerProvider] is required for animations
@@ -138,7 +139,9 @@ class StackedTrioCarouselController {
     } else if (status == AnimationStatus.completed) {
       _hasPassedMid = false;
       if (_swipingMethod == SwipingMethod.userDriven) {
-        if (_isSwipingforward && !_cardSwapped && _animationController.value == 1) {
+        if (_isSwipingforward &&
+            !_cardSwapped &&
+            _animationController.value == 1) {
           onAnimationEnd?.call();
           _cardSwapped = true; // Mark that the card has been swapped
           _animationController.reset();
@@ -226,20 +229,26 @@ class StackedTrioCarouselController {
 
     opacityAnimations = [
       // Opacity animation for the first card
-      Tween<double>(begin: params.minimumOpacity, end: params.minimumOpacity).animate(_animationController),
+      Tween<double>(begin: params.minimumOpacity, end: params.minimumOpacity)
+          .animate(_animationController),
       // Opacity animation for the second card
-      Tween<double>(begin: params.minimumOpacity, end: params.maximumOpacity).animate(_animationController),
+      Tween<double>(begin: params.minimumOpacity, end: params.maximumOpacity)
+          .animate(_animationController),
       // Opacity animation for the third card
-      Tween<double>(begin: params.maximumOpacity, end: params.minimumOpacity).animate(_animationController),
+      Tween<double>(begin: params.maximumOpacity, end: params.minimumOpacity)
+          .animate(_animationController),
     ];
 
     scaleAnimations = [
       // Scale animation for the first card
-      Tween<double>(begin: params.scaleRatio, end: params.scaleRatio).animate(_animationController),
+      Tween<double>(begin: params.scaleRatio, end: params.scaleRatio)
+          .animate(_animationController),
       // Scale animation for the second card
-      Tween<double>(begin: params.scaleRatio, end: 1).animate(_animationController),
+      Tween<double>(begin: params.scaleRatio, end: 1)
+          .animate(_animationController),
       // Scale animation for the third card
-      Tween<double>(begin: 1, end: params.scaleRatio).animate(_animationController),
+      Tween<double>(begin: 1, end: params.scaleRatio)
+          .animate(_animationController),
     ];
   }
 
@@ -255,9 +264,14 @@ class StackedTrioCarouselController {
     required double width,
     required double height,
   }) {
-    final xCord = ((width / 2) - (cardWidth / 2)) - (((width / 2) - (cardWidth / 2)) * math.cos(angle)) + padding.horizontal;
-    final yCord = ((height / 2) - (cardHeight / 2)) - (((height / 2) - (cardHeight / 2)) * math.sin(angle));
-    return Offset(xCord, yCord); // Adjust position based on scale ratio and padding
+    final xCord = ((width / 2) - (cardWidth / 2)) -
+        (((width / 2) - (cardWidth / 2)) * math.cos(angle)) +
+        padding.horizontal;
+    final yCord = ((height / 2) - (cardHeight / 2)) -
+        (((height / 2) - (cardHeight / 2)) * math.sin(angle)) +
+        padding.vertical;
+    return Offset(
+        xCord, yCord); // Adjust position based on scale ratio and padding
   }
 
   /// Helper to calculate the position of the second card
@@ -272,9 +286,14 @@ class StackedTrioCarouselController {
     required double width,
     required double height,
   }) {
-    final xCord = ((width / 2) - (cardWidth / 2)) + (((width / 2) - (cardWidth / 2)) * math.cos(angle)) - padding.horizontal;
-    final yCord = ((height / 2) - (cardHeight / 2)) + (((height / 2) - (cardHeight / 2)) * math.sin(angle));
-    return Offset(xCord, yCord); // Adjust position based on scale ratio and padding
+    final xCord = ((width / 2) - (cardWidth / 2)) +
+        (((width / 2) - (cardWidth / 2)) * math.cos(angle)) -
+        padding.horizontal;
+    final yCord = ((height / 2) - (cardHeight / 2)) +
+        (((height / 2) - (cardHeight / 2)) * math.sin(angle)) -
+        padding.vertical;
+    return Offset(
+        xCord, yCord); // Adjust position based on scale ratio and padding
   }
 
   /// Helper to calculate the position of the third card (center widget)
@@ -347,7 +366,8 @@ class StackedTrioCarouselController {
 
   /// Updates animation progress based on user drag gestures
   void onUserInteractionUpdate(DragUpdateDetails details, double cardWidth) {
-    _swipingMethod = SwipingMethod.userDriven; // Set swiping method to user-driven
+    _swipingMethod =
+        SwipingMethod.userDriven; // Set swiping method to user-driven
 
     // Determine swipe direction and update state
     if (_isSwipingforward != details.delta.dx < 0) {
@@ -356,8 +376,11 @@ class StackedTrioCarouselController {
     _isSwipingforward = details.delta.dx < 0; // Update swiping direction
 
     if (!_cardSwapped) {
-      double value = 1 - (details.globalPosition.dx / cardWidth); // Calculate new animation value
-      _animationController.value = value.clamp(0, 1); // Clamp value between 0 and 1
+      double value = 1 -
+          (details.globalPosition.dx /
+              cardWidth); // Calculate new animation value
+      _animationController.value =
+          value.clamp(0, 1); // Clamp value between 0 and 1
     }
   }
 

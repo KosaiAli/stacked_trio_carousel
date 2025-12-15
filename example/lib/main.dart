@@ -45,8 +45,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void initState() {
     _carouselController = StackedTrioCarouselController(
       tickerProvider: this,
-      animationDuration: const Duration(seconds: 2),
-      autoPlayInterval: const Duration(seconds: 1),
+      animationDuration: const Duration(milliseconds: 800),
+      autoPlayInterval: const Duration(seconds: 2),
       autoPlay: true,
     );
     super.initState();
@@ -69,7 +69,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               cardHeight: 200,
               cardWidth: 200,
               scaleRatio: 0.8,
-              padding: const EdgeInsets.symmetric(horizontal: 0),
             ),
             routeObserver: routeObserver,
             controller: _carouselController,
@@ -96,11 +95,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ),
           ElevatedButton(
             onPressed: () {
-              _carouselController.autoPlay ? _carouselController.stopAutoPlay() : _carouselController.startAutoPlay();
+              _carouselController.autoPlay
+                  ? _carouselController.stopAutoPlay()
+                  : _carouselController.startAutoPlay();
               setState(() {});
             },
             child: Text(
-              _carouselController.autoPlay ? "Stop Auto Play" : "Start Auto Play",
+              _carouselController.autoPlay
+                  ? "Stop Auto Play"
+                  : "Start Auto Play",
               style: const TextStyle(color: Colors.black),
             ),
           )

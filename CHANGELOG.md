@@ -1,39 +1,44 @@
 ## 0.0.1
 
-* Initial release.
+- Initial release.
 
 ## 0.0.2
 
-* Update README.md
+- Update README.md
 
 ## 0.0.3
 
-* ADD repository
+- ADD repository
 
 ## 0.0.4
 
-* ADD stacked trio carousel controller 
+- ADD stacked trio carousel controller 
 
 ## 0.0.5
 
-* Fix Bugs
+- Fix Bugs
 
 ## 1.0.0
 
-* Animation Logic Moved to Controller
+- Animation Logic Moved to Controller
 
 ## 1.0.1
 
-* Update README.md
+- Update README.md
 
 ## 1.0.2 
 
-* Fix analysis warnings and align code with Flutter/Dart linting rules
+- Fix analysis warnings and align code with Flutter/Dart linting rules
 
 ## 1.0.3 
 
-* Add customizable orientation for items in the carousel
+- Add customizable orientation for items in the carousel
 
 ## 1.0.4
 
-* Update README.md
+- Update README.md
+
+## 1.0.5
+
+- Resolve Dart formatting issues
+- Add vertical padding 

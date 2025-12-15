@@ -61,7 +61,8 @@ class StackedTrioCarousel extends StatefulWidget {
   State<StackedTrioCarousel> createState() => _StackedTrioCarouselState();
 }
 
-class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerProviderStateMixin, RouteAware {
+class _StackedTrioCarouselState extends State<StackedTrioCarousel>
+    with TickerProviderStateMixin, RouteAware {
   // Caching overlay entries to manage their visibility and order
   final List<OverlayEntry> _overlayEntries = [];
 
@@ -72,7 +73,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
 
   @override
   void initState() {
-    _controller = widget.controller ?? StackedTrioCarouselController(tickerProvider: this);
+    _controller = widget.controller ??
+        StackedTrioCarouselController(tickerProvider: this);
 
     _controller.onAnimationStart = _handleAnimationStart;
     _controller.onAnimationEnd = _handleAnimationEnd;
@@ -146,7 +148,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
           entry.remove(); // Remove mounted overlay entries
         } // Remove each overlay entry from the overlay
       } catch (e, st) {
-        debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to remove entry: $entry'
+        debugPrint(
+            '[StackedTrioCarousel:OverlayEntries] Failed to remove entry: $entry'
             'Error: $e\n$st');
       }
     }
@@ -158,15 +161,18 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
   void didPopNext() {
     // Handle the event when this widget is brought back into view
     Future.delayed(
-      widget.params.appearDuration, // Wait for the specified duration before appearing
+      widget.params
+          .appearDuration, // Wait for the specified duration before appearing
       () {
         for (var entry in _overlayEntries) {
           if (mounted) {
             // Check if the widget is still in the widget tree
             try {
-              Overlay.of(context).insert(entry); // Re-insert each overlay entry into the overlay
+              Overlay.of(context).insert(
+                  entry); // Re-insert each overlay entry into the overlay
             } catch (e, st) {
-              debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: $entry'
+              debugPrint(
+                  '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: $entry'
                   'Error: $e\n$st');
             }
           }
@@ -179,14 +185,16 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
   void didPushNext() {
     // Handle the event when this widget is pushed off the screen
     Future.delayed(
-      widget.params.disappearDuration, // Wait for the specified duration before disappearing
+      widget.params
+          .disappearDuration, // Wait for the specified duration before disappearing
       () {
         for (var entry in _overlayEntries) {
           if (entry.mounted) {
             try {
               entry.remove(); // Remove mounted overlay entries
             } catch (e, st) {
-              debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to remove entry: $entry'
+              debugPrint(
+                  '[StackedTrioCarousel:OverlayEntries] Failed to remove entry: $entry'
                   'Error: $e\n$st');
             }
           } // Remove each overlay entry from the overlay
@@ -194,7 +202,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
       },
     );
 
-    super.didPushNext(); // Call the superclass method to ensure proper functionality
+    super
+        .didPushNext(); // Call the superclass method to ensure proper functionality
   }
 
   // Rearranging the cards
@@ -231,7 +240,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
           _overlayEntries[i],
         ); // Insert the overlay into the overlay stack
       } catch (e, st) {
-        debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[i]}'
+        debugPrint(
+            '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[i]}'
             'Error: $e\n$st');
       }
     }
@@ -266,10 +276,12 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
                     child: GestureDetector(
                       onPanDown: _onPanDown, // Handle touch down event
                       onPanUpdate: _onPanUpdate, // Handle touch movement
-                      onPanCancel: _onPanCancel, // Handle cancellation of the gesture
+                      onPanCancel:
+                          _onPanCancel, // Handle cancellation of the gesture
                       onPanEnd: _onPanEnd, // Handle end of the gesture
                       child: IgnorePointer(
-                        ignoring: child != _children.last && !_controller.isAnimationCompleted,
+                        ignoring: child != _children.last &&
+                            !_controller.isAnimationCompleted,
                         child: child, // Display the child widget
                       ),
                     ),
@@ -329,19 +341,22 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
     try {
       Overlay.of(context).insert(_overlayEntries[order[0]]);
     } catch (e, st) {
-      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[0]]}'
+      debugPrint(
+          '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[0]]}'
           'Error: $e\n$st');
     }
     try {
       Overlay.of(context).insert(_overlayEntries[order[1]]);
     } catch (e, st) {
-      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[1]]}'
+      debugPrint(
+          '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[1]]}'
           'Error: $e\n$st');
     }
     try {
       Overlay.of(context).insert(_overlayEntries[order[2]]);
     } catch (e, st) {
-      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[2]]}'
+      debugPrint(
+          '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[2]]}'
           'Error: $e\n$st');
     }
   }
