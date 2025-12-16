@@ -45,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       tickerProvider: this,
       animationDuration: const Duration(milliseconds: 800),
       autoPlayInterval: const Duration(seconds: 2),
-      swipingDirection: SwipingDirection.ltr,
+      swipingDirection: SwipingDirection.rtl,
       autoPlay: true,
     );
     super.initState();

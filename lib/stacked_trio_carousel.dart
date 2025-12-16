@@ -252,19 +252,22 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
               link: layerLink,
               showWhenUnlinked: false,
               offset: animation.value!,
-              child: Transform.scale(
-                scale: scale.value, // Scale the card based on animation
-                child: Material(
-                  color: Colors.transparent,
-                  child: GestureDetector(
-                    onPanDown: _onPanDown, // Handle touch down event
-                    onPanUpdate: _onPanUpdate, // Handle touch movement
-                    onPanCancel: _onPanCancel, // Handle cancellation of the gesture
-                    onPanEnd: _onPanEnd, // Handle end of the gesture
-                    child: IgnorePointer(
-                      ignoring:
-                          child != _children.last && !_controller.isAnimationCompleted,
-                      child: child, // Display the child widget
+              child: Opacity(
+                opacity: opacity.value!,
+                child: Transform.scale(
+                  scale: scale.value, // Scale the card based on animation
+                  child: Material(
+                    color: Colors.transparent,
+                    child: GestureDetector(
+                      onPanDown: _onPanDown, // Handle touch down event
+                      onPanUpdate: _onPanUpdate, // Handle touch movement
+                      onPanCancel: _onPanCancel, // Handle cancellation of the gesture
+                      onPanEnd: _onPanEnd, // Handle end of the gesture
+                      child: IgnorePointer(
+                        ignoring:
+                            child != _children.last && !_controller.isAnimationCompleted,
+                        child: child, // Display the child widget
+                      ),
                     ),
                   ),
                 ),

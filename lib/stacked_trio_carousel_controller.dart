@@ -227,31 +227,14 @@ class StackedTrioCarouselController {
       ];
     }
 
-    if (forward) {
-      scaleAnimations = [
-        // Scale animation for the first card
-        biTween(params.scaleRatio, params.scaleRatio).animate(_animationController),
-        // Scale animation for the second card
-        biTween(params.scaleRatio, 1.0).animate(_animationController),
-        // Scale animation for the third card
-        biTween(1.0, params.scaleRatio).animate(_animationController),
-      ];
-    } else {
-      scaleAnimations = [
-        // Scale animation for the first card
-        biTween(params.scaleRatio, params.scaleRatio).animate(_animationController),
-        // Scale animation for the third card
-        biTween(params.scaleRatio, 1.0).animate(_animationController),
-        // Scale animation for the second card
-        biTween(1.0, params.scaleRatio).animate(_animationController),
-      ];
-    }
-
-    // positionAnimations = [
-    //   biTween(firstPos, secondPos).animate(_animationController),
-    //   biTween(thirdPos, firstPos).animate(_animationController),
-    //   biTween(secondPos, thirdPos).animate(_animationController),
-    // ];
+    scaleAnimations = [
+      // Scale animation for the first card
+      biTween(params.scaleRatio, params.scaleRatio).animate(_animationController),
+      // Scale animation for the third card
+      biTween(params.scaleRatio, 1.0).animate(_animationController),
+      // Scale animation for the second card
+      biTween(1.0, params.scaleRatio).animate(_animationController),
+    ];
 
     opacityAnimations = [
       // Opacity animation for the first card
@@ -261,52 +244,6 @@ class StackedTrioCarouselController {
       // Opacity animation for the third card
       biTween(params.maximumOpacity, params.minimumOpacity).animate(_animationController),
     ];
-
-    opacityAnimations = [
-      // Opacity animation for the first card
-      biTween(params.minimumOpacity, params.minimumOpacity).animate(_animationController),
-      // Opacity animation for the third card
-      biTween(params.maximumOpacity, params.minimumOpacity).animate(_animationController),
-      // Opacity animation for the second card
-      biTween(params.minimumOpacity, params.maximumOpacity).animate(_animationController),
-    ];
-
-    // scaleAnimations = [
-    //   // Scale animation for the first card
-    //   biTween(params.scaleRatio, params.scaleRatio).animate(_animationController),
-    //   // Scale animation for the third card
-    //   biTween(1.0, params.scaleRatio).animate(_animationController),
-    //   // Scale animation for the second card
-    //   biTween(params.scaleRatio, 1.0).animate(_animationController),
-    // ];
-
-    // positionAnimations = [biTween(firstPos, secondPos).animate(_animationController)];
-    // opacityAnimations = [
-    //   biTween(params.minimumOpacity, params.minimumOpacity).animate(_animationController)
-    // ];
-    // scaleAnimations = [
-    //   biTween(params.scaleRatio, params.scaleRatio).animate(_animationController)
-    // ];
-
-    // if (forward) {
-    //   positionAnimations.add(biTween(secondPos, thirdPos).animate(_animationController));
-    //   positionAnimations.add(biTween(thirdPos, firstPos).animate(_animationController));
-    //   opacityAnimations.add(biTween(params.minimumOpacity, params.maximumOpacity)
-    //       .animate(_animationController));
-    //   opacityAnimations.add(biTween(params.maximumOpacity, params.minimumOpacity)
-    //       .animate(_animationController));
-    //   scaleAnimations.add(biTween(params.scaleRatio, 1.0).animate(_animationController));
-    //   scaleAnimations.add(biTween(1.0, params.scaleRatio).animate(_animationController));
-    // } else {
-    //   positionAnimations.add(biTween(thirdPos, firstPos).animate(_animationController));
-    //   positionAnimations.add(biTween(secondPos, thirdPos).animate(_animationController));
-    //   opacityAnimations.add(biTween(params.maximumOpacity, params.minimumOpacity)
-    //       .animate(_animationController));
-    //   opacityAnimations.add(biTween(params.minimumOpacity, params.maximumOpacity)
-    //       .animate(_animationController));
-    //   scaleAnimations.add(biTween(1.0, params.scaleRatio).animate(_animationController));
-    //   scaleAnimations.add(biTween(params.scaleRatio, 1.0).animate(_animationController));
-    // }
   }
 
   /// Helper to calculate the position of the first card
