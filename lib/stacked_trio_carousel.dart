@@ -55,7 +55,8 @@ class StackedTrioCarousel extends StatefulWidget {
   State<StackedTrioCarousel> createState() => _StackedTrioCarouselState();
 }
 
-class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerProviderStateMixin, RouteAware {
+class _StackedTrioCarouselState extends State<StackedTrioCarousel>
+    with TickerProviderStateMixin, RouteAware {
   // Caching overlay entries to manage their visibility and order
   final List<OverlayEntry> _overlayEntries = [];
 
@@ -66,7 +67,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
 
   @override
   void initState() {
-    _controller = widget.controller ?? StackedTrioCarouselController(tickerProvider: this);
+    _controller =
+        widget.controller ?? StackedTrioCarouselController(tickerProvider: this);
 
     _controller.onAnimationStart = _handleAnimationStart;
     _controller.onAnimationEnd = _handleAnimationEnd;
@@ -83,10 +85,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
         Offset widgetOffset = renderBox.localToGlobal(Offset.zero);
 
         _controller.initializeAnimations(
-          params: widget.params,
-          widgetSize: size,
-          widgetOffset: widgetOffset
-        );
+            params: widget.params, widgetSize: size, widgetOffset: widgetOffset);
       } catch (e, st) {
         debugPrint(
           '[StackedTrioCarousel:initState] Failed to initialize layout or animations.\n'
@@ -155,9 +154,11 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
           if (mounted) {
             // Check if the widget is still in the widget tree
             try {
-              Overlay.of(context).insert(entry); // Re-insert each overlay entry into the overlay
+              Overlay.of(context)
+                  .insert(entry); // Re-insert each overlay entry into the overlay
             } catch (e, st) {
-              debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: $entry'
+              debugPrint(
+                  '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: $entry'
                   'Error: $e\n$st');
             }
           }
@@ -170,14 +171,16 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
   void didPushNext() {
     // Handle the event when this widget is pushed off the screen
     Future.delayed(
-      widget.params.disappearDuration, // Wait for the specified duration before disappearing
+      widget.params
+          .disappearDuration, // Wait for the specified duration before disappearing
       () {
         for (var entry in _overlayEntries) {
           if (entry.mounted) {
             try {
               entry.remove(); // Remove mounted overlay entries
             } catch (e, st) {
-              debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to remove entry: $entry'
+              debugPrint(
+                  '[StackedTrioCarousel:OverlayEntries] Failed to remove entry: $entry'
                   'Error: $e\n$st');
             }
           } // Remove each overlay entry from the overlay
@@ -222,7 +225,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
           _overlayEntries[i],
         ); // Insert the overlay into the overlay stack
       } catch (e, st) {
-        debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[i]}'
+        debugPrint(
+            '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[i]}'
             'Error: $e\n$st');
       }
     }
@@ -258,7 +262,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
                     onPanCancel: _onPanCancel, // Handle cancellation of the gesture
                     onPanEnd: _onPanEnd, // Handle end of the gesture
                     child: IgnorePointer(
-                      ignoring: child != _children.last && !_controller.isAnimationCompleted,
+                      ignoring:
+                          child != _children.last && !_controller.isAnimationCompleted,
                       child: child, // Display the child widget
                     ),
                   ),
@@ -283,7 +288,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
 
   /// Handles the update of a swipe gesture
   void _onPanUpdate(DragUpdateDetails details) {
-    _controller.onUserInteractionUpdate(details, widget.params.cardWidth,widget.params);
+    _controller.onUserInteractionUpdate(details, widget.params.cardWidth, widget.params);
   }
 
   /// Handles the start of a swipe gesture
@@ -317,19 +322,22 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
     try {
       Overlay.of(context).insert(_overlayEntries[order[0]]);
     } catch (e, st) {
-      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[0]]}'
+      debugPrint(
+          '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[0]]}'
           'Error: $e\n$st');
     }
     try {
       Overlay.of(context).insert(_overlayEntries[order[1]]);
     } catch (e, st) {
-      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[1]]}'
+      debugPrint(
+          '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[1]]}'
           'Error: $e\n$st');
     }
     try {
       Overlay.of(context).insert(_overlayEntries[order[2]]);
     } catch (e, st) {
-      debugPrint('[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[2]]}'
+      debugPrint(
+          '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[2]]}'
           'Error: $e\n$st');
     }
   }
@@ -338,7 +346,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
     switch (_controller.swipingMethod) {
       case SwipingMethod.animationDriven:
         // Check if the animation controller value indicates that the animation is past halfway
-        if (progress.abs() > 0.5) {
+        if (progress > 0.5) {
           // Change the order of the card overlay entries so the animation appears smooth
           // This block will only execute once when transitioning past the midpoint
           if (!_controller.hasPassedMid) {
@@ -350,6 +358,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
             }
 
             // _reinsertOverlayEntries([0, 1, 2]);
+
             _reinsertOverlayEntries([0, 2, 1]);
           }
         }
@@ -357,37 +366,35 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
 
       case SwipingMethod.userDriven:
         // Handle user-driven swiping logic
-        if (_controller.isSwipingforward) {
-          // Check if the user is swiping forward (to the left)
-          if (progress.abs() > 0.5) {
-            // Change order of overlay entries when swiping forward past the midpoint
-            if (!_controller.hasPassedMid) {
-              for (var entry in _overlayEntries) {
-                if (entry.mounted) {
-                  entry.remove(); // Remove mounted overlay entries
-                } // Remove all entries for reordering
-              }
 
-              // _reinsertOverlayEntries([0, 1, 2]);
-              _reinsertOverlayEntries([0, 2, 1]);
+        // Check if the user is swiping forward (to the left)
+        if (progress > 0.5) {
+          // Change order of overlay entries when swiping forward past the midpoint
+          if (!_controller.hasPassedMid) {
+            for (var entry in _overlayEntries) {
+              if (entry.mounted) {
+                entry.remove(); // Remove mounted overlay entries
+              } // Remove all entries for reordering
             }
-          }
-        } else {
-          // If the user is swiping backward (to the right)
-          if (progress.abs() < 0.5) {
-            // Change order of overlay entries when swiping backward past the midpoint
-            if (!_controller.hasPassedMid) {
-              for (var entry in _overlayEntries) {
-                if (entry.mounted) {
-                  entry.remove(); // Remove mounted overlay entries
-                } // Remove all entries for reordering
-              }
 
-              // _reinsertOverlayEntries([0, 2, 1]);
-              _reinsertOverlayEntries([0, 1, 2]);
-            }
+            _reinsertOverlayEntries([0, 2, 1]);
           }
         }
+        // If the user is swiping backward (to the right)
+        else if (progress < 0.5) {
+          // Change order of overlay entries when swiping backward past the midpoint
+          if (!_controller.hasPassedMid) {
+            for (var entry in _overlayEntries) {
+              if (entry.mounted) {
+                entry.remove(); // Remove mounted overlay entries
+              } // Remove all entries for reordering
+            }
+
+            // _reinsertOverlayEntries([0, 2, 1]);
+            _reinsertOverlayEntries([0, 1, 2]);
+          }
+        }
+
         break;
     }
   }

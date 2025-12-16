@@ -45,8 +45,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       tickerProvider: this,
       animationDuration: const Duration(milliseconds: 800),
       autoPlayInterval: const Duration(seconds: 2),
-      swipingDirection: SwipingDirection.rtl,
-      autoPlay: false,
+      swipingDirection: SwipingDirection.ltr,
+      autoPlay: true,
     );
     super.initState();
   }
@@ -76,6 +76,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             children: _color
                 .map(
                   (color) => GestureDetector(
+                    key: ValueKey(color),
                     onTap: () {
                       Navigator.push(
                           context,
@@ -95,7 +96,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ),
           ElevatedButton(
             onPressed: () {
-              _carouselController.autoPlay ? _carouselController.stopAutoPlay() : _carouselController.startAutoPlay();
+              _carouselController.autoPlay
+                  ? _carouselController.stopAutoPlay()
+                  : _carouselController.startAutoPlay();
               setState(() {});
             },
             child: Text(
