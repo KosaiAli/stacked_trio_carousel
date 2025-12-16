@@ -13,6 +13,14 @@ enum SwipingMethod {
   userDriven,
 }
 
+enum SwipingDirection {
+  /// Swiping from Right to Left
+  rtl,
+
+  /// Swiping from Left to Right
+  ltr
+}
+
 /// Controller class for managing the StackedTrioCarousel
 class StackedTrioCarouselController {
   /// AnimationController for managing card animations
@@ -23,14 +31,16 @@ class StackedTrioCarouselController {
   late List<Animation<double>> opacityAnimations;
   late List<Animation<double>> scaleAnimations;
 
+  late Offset _centerPoint;
+
   /// Timer for enabling auto-play functionality
   Timer? _timer;
 
-  /// Current index of the active card in the carousel
-  int _currentIndex = 0;
+  // /// Current index of the active card in the carousel
+  // int _currentIndex = 0;
 
-  /// Getter for the current index of the active card
-  int get currentIndex => _currentIndex;
+  // /// Getter for the current index of the active card
+  // int get currentIndex => _currentIndex;
 
   /// Duration for the animation between cards
   final Duration animationDuration;
@@ -50,8 +60,19 @@ class StackedTrioCarouselController {
   /// The current swiping method (animation or user-driven)
   late SwipingMethod _swipingMethod;
 
+  /// The Offset of the Widget relative to the main screen
+  late Offset _widgetOffset;
+
+  /// The Size of widget
+  late Size _widgetSize;
+
   /// Getter for the swiping method
   SwipingMethod get swipingMethod => _swipingMethod;
+
+  /// Direction of Swiping
+  late SwipingDirection _swipingDirection;
+
+  SwipingDirection get swipingDirection => _swipingDirection;
 
   /// Flag indicating the swiping direction (forward or backward)
   bool _isSwipingforward = false;
@@ -77,8 +98,7 @@ class StackedTrioCarouselController {
   /// Getter for whether auto-play is active
   bool get autoPlay => _autoPlay;
 
-  bool get isAnimationCompleted =>
-      _animationController.status == AnimationStatus.completed;
+  bool get isAnimationCompleted => _animationController.status == AnimationStatus.completed;
 
   /// Constructor for the controller
   /// - [tickerProvider] is required for animations
@@ -89,9 +109,14 @@ class StackedTrioCarouselController {
     required TickerProvider tickerProvider,
     this.animationDuration = const Duration(seconds: 1),
     this.autoPlayInterval = const Duration(seconds: 3),
+    SwipingDirection swipingDirection = SwipingDirection.rtl,
     bool autoPlay = true,
   }) {
+    _swipingDirection = swipingDirection;
     _animationController = AnimationController(
+      lowerBound: -1,
+      value: 0,
+      upperBound: 1,
       vsync: tickerProvider,
       duration: animationDuration,
     )
@@ -111,23 +136,24 @@ class StackedTrioCarouselController {
   void _animationListener() {
     // Notify the listener about animation progress
     onAnimationProgress?.call(_animationController.value);
+
     switch (_swipingMethod) {
       case SwipingMethod.animationDriven:
         // Update halfway point flag for animation-driven swiping
-        if (_animationController.value > 0.5 && !_hasPassedMid) {
+        if (_animationController.value.abs() > 0.5 && !_hasPassedMid) {
           _hasPassedMid = true;
         }
         break;
       case SwipingMethod.userDriven:
         // Update halfway point flag based on swiping direction
         if (_isSwipingforward) {
-          if (_animationController.value > 0.5 && !_hasPassedMid) {
+          if (_animationController.value.abs() > 0.5 && !_hasPassedMid) {
             _hasPassedMid = true;
           }
         } else {
-          if (_animationController.value < 0.5 && _hasPassedMid) {
-            _hasPassedMid = true;
-          }
+          // if (_animationController.value < 0.5 && _hasPassedMid) {
+          //   _hasPassedMid = true; // is indeed true :D
+          // }
         }
     }
   }
@@ -139,17 +165,16 @@ class StackedTrioCarouselController {
     } else if (status == AnimationStatus.completed) {
       _hasPassedMid = false;
       if (_swipingMethod == SwipingMethod.userDriven) {
-        if (_isSwipingforward &&
-            !_cardSwapped &&
-            _animationController.value == 1) {
+        //TODO: Fix the behaviour
+        if (_isSwipingforward && !_cardSwapped && _animationController.value.abs() == 1) {
           onAnimationEnd?.call();
           _cardSwapped = true; // Mark that the card has been swapped
-          _animationController.reset();
+          _animationController.value = 0;
         }
       } else {
-        if (_animationController.value == 1) {
+        if (_animationController.value.abs() == 1) {
           onAnimationEnd?.call();
-          _animationController.reset();
+          _animationController.value = 0;
         }
       }
     }
@@ -158,161 +183,85 @@ class StackedTrioCarouselController {
   /// Initialize animations for positions, opacity, and scaling
   void initializeAnimations({
     required StackedTrioCarouselParams params,
-    required Offset startPoint,
-    required Size size,
-    required double angle,
-    required double yCenter,
+    required Size widgetSize,
+    required Offset widgetOffset,
   }) {
+    final xCenterPoint = (widgetSize.width - params.cardWidth) / 2;
+    final yCenterPoint = (widgetSize.height - params.cardHeight) / 2;
+    _widgetOffset = widgetOffset;
+    _widgetSize = widgetSize;
+    _centerPoint = Offset(xCenterPoint, yCenterPoint);
+    // Position animation for the first card
+    updateAnimations(params);
+  }
+
+  void updateAnimations(StackedTrioCarouselParams params) {
+    bool forward = (_swipingDirection != SwipingDirection.rtl);
+
+    final firstPos = _firstCardPosition(
+      padding: params.padding,
+      angle: params.angle,
+    );
+
+    final secondPos = _secondCardPosition(
+      padding: params.padding,
+      angle: params.angle,
+    );
+
+    final thirdPos = _centerPoint;
+
+    Tween<T> biTween<T>(T a, T b) => Tween(begin: forward ? a : b, end: forward ? b : a);
+
     positionAnimations = [
-      // Position animation for the first card
-      Tween(
-              begin: _firstCardPosition(
-                  xPoint: startPoint.dx,
-                  cardWidth: params.cardWidth,
-                  padding: params.padding,
-                  scaleRatio: params.scaleRatio,
-                  cardHeight: params.cardHeight,
-                  yCenter: yCenter,
-                  angle: angle,
-                  height: size.height,
-                  width: size.width),
-              end: _secondCardPosition(
-                  cardWidth: params.cardWidth,
-                  padding: params.padding,
-                  scaleRatio: params.scaleRatio,
-                  width: size.width,
-                  angle: angle,
-                  cardHeight: params.cardHeight,
-                  yCenter: yCenter,
-                  height: size.height,
-                  xPoint: startPoint.dx))
-          .animate(_animationController),
-      // Position animation for the second card
-      Tween(
-          begin: _secondCardPosition(
-            cardWidth: params.cardWidth,
-            padding: params.padding,
-            scaleRatio: params.scaleRatio,
-            width: size.width,
-            angle: angle,
-            cardHeight: params.cardHeight,
-            yCenter: yCenter,
-            height: size.height,
-            xPoint: startPoint.dx,
-          ),
-          end: _thirdCardPosition(
-            cardWidth: params.cardWidth,
-            width: size.width,
-            cardHeight: params.cardHeight,
-            height: yCenter * 2,
-          )).animate(_animationController),
-      // Position animation for the third card
-      Tween(
-          begin: _thirdCardPosition(
-            cardWidth: params.cardWidth,
-            width: size.width,
-            height: yCenter * 2,
-            cardHeight: params.cardHeight,
-          ),
-          end: _firstCardPosition(
-            xPoint: startPoint.dx,
-            cardWidth: params.cardWidth,
-            padding: params.padding,
-            scaleRatio: params.scaleRatio,
-            cardHeight: params.cardHeight,
-            yCenter: yCenter,
-            angle: angle,
-            height: size.height,
-            width: size.width,
-          )).animate(_animationController)
+      biTween(firstPos, secondPos).animate(_animationController),
+      biTween(secondPos, thirdPos).animate(_animationController),
+      biTween(thirdPos, firstPos).animate(_animationController),
     ];
 
     opacityAnimations = [
       // Opacity animation for the first card
-      Tween<double>(begin: params.minimumOpacity, end: params.minimumOpacity)
-          .animate(_animationController),
+      biTween(params.minimumOpacity, params.minimumOpacity).animate(_animationController),
       // Opacity animation for the second card
-      Tween<double>(begin: params.minimumOpacity, end: params.maximumOpacity)
-          .animate(_animationController),
+      biTween(params.minimumOpacity, params.maximumOpacity).animate(_animationController),
       // Opacity animation for the third card
-      Tween<double>(begin: params.maximumOpacity, end: params.minimumOpacity)
-          .animate(_animationController),
+      biTween(params.maximumOpacity, params.minimumOpacity).animate(_animationController),
     ];
 
     scaleAnimations = [
       // Scale animation for the first card
-      Tween<double>(begin: params.scaleRatio, end: params.scaleRatio)
-          .animate(_animationController),
+      biTween(params.scaleRatio, params.scaleRatio).animate(_animationController),
       // Scale animation for the second card
-      Tween<double>(begin: params.scaleRatio, end: 1)
-          .animate(_animationController),
+      biTween(params.scaleRatio, 1.0).animate(_animationController),
       // Scale animation for the third card
-      Tween<double>(begin: 1, end: params.scaleRatio)
-          .animate(_animationController),
+      biTween(1.0, params.scaleRatio).animate(_animationController),
     ];
   }
 
   /// Helper to calculate the position of the first card
   Offset _firstCardPosition({
-    required double xPoint,
-    required double cardWidth,
-    required double cardHeight,
-    required double scaleRatio,
     required EdgeInsets padding,
-    required double yCenter,
     required double angle,
-    required double width,
-    required double height,
   }) {
-    final xCord = ((width / 2) - (cardWidth / 2)) -
-        (((width / 2) - (cardWidth / 2)) * math.cos(angle)) +
-        padding.horizontal;
-    final yCord = ((height / 2) - (cardHeight / 2)) -
-        (((height / 2) - (cardHeight / 2)) * math.sin(angle)) +
-        padding.vertical;
-    return Offset(
-        xCord, yCord); // Adjust position based on scale ratio and padding
+    final xCord = _centerPoint.dx * (1 - math.cos(angle)) + padding.horizontal;
+    final yCord = _centerPoint.dy * (1 - math.sin(angle)) + padding.vertical;
+    return Offset(xCord, yCord); // Adjust position based on scale ratio and padding
   }
 
   /// Helper to calculate the position of the second card
   Offset _secondCardPosition({
-    required double xPoint,
-    required double cardWidth,
-    required double cardHeight,
-    required double scaleRatio,
     required EdgeInsets padding,
-    required double yCenter,
     required double angle,
-    required double width,
-    required double height,
   }) {
-    final xCord = ((width / 2) - (cardWidth / 2)) +
-        (((width / 2) - (cardWidth / 2)) * math.cos(angle)) -
-        padding.horizontal;
-    final yCord = ((height / 2) - (cardHeight / 2)) +
-        (((height / 2) - (cardHeight / 2)) * math.sin(angle)) -
-        padding.vertical;
-    return Offset(
-        xCord, yCord); // Adjust position based on scale ratio and padding
-  }
-
-  /// Helper to calculate the position of the third card (center widget)
-  Offset _thirdCardPosition({
-    required double width,
-    required double cardWidth,
-    required double height,
-    required double cardHeight,
-  }) {
-    final xCord = (width / 2) - (cardWidth / 2);
-    final yCord = (height / 2) - (cardHeight / 2);
-    return Offset(xCord, yCord); // Center the card within the parent width
+    final xCord = _centerPoint.dx * (1 + math.cos(angle)) - padding.horizontal;
+    final yCord = _centerPoint.dy * (1 + math.sin(angle)) - padding.vertical;
+    return Offset(xCord, yCord); // Adjust position based on scale ratio and padding
   }
 
   /// Starts the auto-play timer
   void startAutoPlay() {
     _stopTimer(); // Ensure no duplicate timers
     _timer = Timer.periodic(autoPlayInterval, (_) {
-      next(); // Automatically move to the next card
+      _swipingDirection == SwipingDirection.rtl ? next() : previous(); // Automatically move to the next card
     });
     _autoPlay = true;
     _swipingMethod = SwipingMethod.animationDriven;
@@ -333,7 +282,7 @@ class StackedTrioCarouselController {
   /// Animates to the next card in the carousel
   void next() {
     if (!_animationController.isAnimating) {
-      _currentIndex = (_currentIndex + 1) % 3; // Circular logic for 3 cards
+      // _currentIndex = (_currentIndex + 1) % 3; // Circular logic for 3 cards
       _animationController.animateTo(1);
     }
   }
@@ -341,7 +290,7 @@ class StackedTrioCarouselController {
   /// Animates to the previous card in the carousel
   void previous() {
     if (!_animationController.isAnimating) {
-      _currentIndex = (_currentIndex - 1 + 3) % 3; // Circular logic for 3 cards
+      // _currentIndex = (_currentIndex - 1 + 3) % 3; // Circular logic for 3 cards
       _animationController.animateTo(1);
     }
   }
@@ -349,11 +298,6 @@ class StackedTrioCarouselController {
   /// Stops the ongoing animation
   void stopAnimation() {
     _animationController.stop();
-  }
-
-  /// Animates to a specific value
-  Future animateTo(double value) {
-    return _animationController.animateTo(value);
   }
 
   /// Prepares for user interaction by stopping animations and auto-play
@@ -365,22 +309,28 @@ class StackedTrioCarouselController {
   }
 
   /// Updates animation progress based on user drag gestures
-  void onUserInteractionUpdate(DragUpdateDetails details, double cardWidth) {
-    _swipingMethod =
-        SwipingMethod.userDriven; // Set swiping method to user-driven
+  void onUserInteractionUpdate(DragUpdateDetails details, double cardWidth, StackedTrioCarouselParams params) {
+    _swipingMethod = SwipingMethod.userDriven; // Set swiping method to user-driven
 
+    bool swipingRTL = details.delta.dx < 0;
+    bool leftOfCenter = (_widgetOffset.dx + _widgetSize.width / 2) < details.globalPosition.dx;
+
+    SwipingDirection newSwipingDirection = leftOfCenter ? SwipingDirection.rtl : SwipingDirection.ltr;
+
+    if (newSwipingDirection != _swipingDirection) {
+      _swipingDirection = newSwipingDirection;
+      updateAnimations(params);
+    }
     // Determine swipe direction and update state
-    if (_isSwipingforward != details.delta.dx < 0) {
+    if (_isSwipingforward != swipingRTL) {
       _hasPassedMid = false; // Reset mid-swipe state
     }
-    _isSwipingforward = details.delta.dx < 0; // Update swiping direction
+    _isSwipingforward = swipingRTL; // Update swiping direction
 
     if (!_cardSwapped) {
-      double value = 1 -
-          (details.globalPosition.dx /
-              cardWidth); // Calculate new animation value
-      _animationController.value =
-          value.clamp(0, 1); // Clamp value between 0 and 1
+      double value = 1 - (details.globalPosition.dx / cardWidth); // Calculate new animation value
+      // print(value);
+      _animationController.value = value; // Clamp value between 0 and 1
     }
   }
 
@@ -400,7 +350,7 @@ class StackedTrioCarouselController {
     _swipingMethod = SwipingMethod.animationDriven;
 
     // Check if the swipe was significant enough to trigger an animation
-    if (_animationController.value > 0.5 && _animationController.value != 1) {
+    if (_animationController.value.abs() > 0.5 && _animationController.value != 1) {
       _animationController.animateTo(1).then(
         (value) {
           _hasPassedMid = false; // Reset mid-swipe state=
@@ -412,7 +362,7 @@ class StackedTrioCarouselController {
           }
         },
       );
-    } else if (_animationController.value < 0.5) {
+    } else if (_animationController.value.abs() < 0.5) {
       _animationController.animateTo(0).then(
         (value) {
           _hasPassedMid = false; // Reset mid-swipe state
