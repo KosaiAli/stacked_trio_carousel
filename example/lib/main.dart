@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:stacked_trio_carousel/stacked_trio_carousel.dart';
 import 'package:stacked_trio_carousel/stacked_trio_carousel_controller.dart';
