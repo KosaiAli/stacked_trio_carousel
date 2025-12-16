@@ -338,7 +338,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
     switch (_controller.swipingMethod) {
       case SwipingMethod.animationDriven:
         // Check if the animation controller value indicates that the animation is past halfway
-        if (progress > 0.5) {
+        if (progress.abs() > 0.5) {
           // Change the order of the card overlay entries so the animation appears smooth
           // This block will only execute once when transitioning past the midpoint
           if (!_controller.hasPassedMid) {
@@ -359,7 +359,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
         // Handle user-driven swiping logic
         if (_controller.isSwipingforward) {
           // Check if the user is swiping forward (to the left)
-          if (progress > 0.5) {
+          if (progress.abs() > 0.5) {
             // Change order of overlay entries when swiping forward past the midpoint
             if (!_controller.hasPassedMid) {
               for (var entry in _overlayEntries) {
@@ -374,7 +374,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
           }
         } else {
           // If the user is swiping backward (to the right)
-          if (progress < 0.5) {
+          if (progress.abs() < 0.5) {
             // Change order of overlay entries when swiping backward past the midpoint
             if (!_controller.hasPassedMid) {
               for (var entry in _overlayEntries) {

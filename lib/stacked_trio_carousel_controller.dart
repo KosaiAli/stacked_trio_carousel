@@ -136,7 +136,7 @@ class StackedTrioCarouselController {
   void _animationListener() {
     // Notify the listener about animation progress
     onAnimationProgress?.call(_animationController.value);
-
+    // print(_swipingDirection);
     switch (_swipingMethod) {
       case SwipingMethod.animationDriven:
         // Update halfway point flag for animation-driven swiping
@@ -165,7 +165,7 @@ class StackedTrioCarouselController {
     } else if (status == AnimationStatus.completed) {
       _hasPassedMid = false;
       if (_swipingMethod == SwipingMethod.userDriven) {
-        //TODO: Fix the behaviour
+        // TODO: Fix the behaviour
         if (_isSwipingforward && !_cardSwapped && _animationController.value.abs() == 1) {
           onAnimationEnd?.call();
           _cardSwapped = true; // Mark that the card has been swapped
@@ -196,7 +196,8 @@ class StackedTrioCarouselController {
   }
 
   void updateAnimations(StackedTrioCarouselParams params) {
-    bool forward = (_swipingDirection != SwipingDirection.rtl);
+    bool forward = (_swipingDirection == SwipingDirection.rtl);
+    // bool forward = false;
 
     final firstPos = _firstCardPosition(
       padding: params.padding,
@@ -212,29 +213,75 @@ class StackedTrioCarouselController {
 
     Tween<T> biTween<T>(T a, T b) => Tween(begin: forward ? a : b, end: forward ? b : a);
 
-    positionAnimations = [
-      biTween(firstPos, secondPos).animate(_animationController),
-      biTween(secondPos, thirdPos).animate(_animationController),
-      biTween(thirdPos, firstPos).animate(_animationController),
-    ];
+    /*
+    // positionAnimations = [
+    //   biTween(firstPos, secondPos).animate(_animationController),
+    //   biTween(secondPos, thirdPos).animate(_animationController),
+    //   biTween(thirdPos, firstPos).animate(_animationController),
+    // ];
 
-    opacityAnimations = [
-      // Opacity animation for the first card
-      biTween(params.minimumOpacity, params.minimumOpacity).animate(_animationController),
-      // Opacity animation for the second card
-      biTween(params.minimumOpacity, params.maximumOpacity).animate(_animationController),
-      // Opacity animation for the third card
-      biTween(params.maximumOpacity, params.minimumOpacity).animate(_animationController),
-    ];
+    // positionAnimations = [
+    //   biTween(firstPos, secondPos).animate(_animationController),
+    //   biTween(thirdPos, firstPos).animate(_animationController),
+    //   biTween(secondPos, thirdPos).animate(_animationController),
+    // ];
 
-    scaleAnimations = [
-      // Scale animation for the first card
-      biTween(params.scaleRatio, params.scaleRatio).animate(_animationController),
-      // Scale animation for the second card
-      biTween(params.scaleRatio, 1.0).animate(_animationController),
-      // Scale animation for the third card
-      biTween(1.0, params.scaleRatio).animate(_animationController),
-    ];
+    // opacityAnimations = [
+    //   // Opacity animation for the first card
+    //   biTween(params.minimumOpacity, params.minimumOpacity).animate(_animationController),
+    //   // Opacity animation for the second card
+    //   biTween(params.minimumOpacity, params.maximumOpacity).animate(_animationController),
+    //   // Opacity animation for the third card
+    //   biTween(params.maximumOpacity, params.minimumOpacity).animate(_animationController),
+    // ];
+
+    // opacityAnimations = [
+    //   // Opacity animation for the first card
+    //   biTween(params.minimumOpacity, params.minimumOpacity).animate(_animationController),
+    //   // Opacity animation for the third card
+    //   biTween(params.maximumOpacity, params.minimumOpacity).animate(_animationController),
+    //   // Opacity animation for the second card
+    //   biTween(params.minimumOpacity, params.maximumOpacity).animate(_animationController),
+    // ];
+
+    // scaleAnimations = [
+    //   // Scale animation for the first card
+    //   biTween(params.scaleRatio, params.scaleRatio).animate(_animationController),
+    //   // Scale animation for the second card
+    //   biTween(params.scaleRatio, 1.0).animate(_animationController),
+    //   // Scale animation for the third card
+    //   biTween(1.0, params.scaleRatio).animate(_animationController),
+    // ];
+
+    // scaleAnimations = [
+    //   // Scale animation for the first card
+    //   biTween(params.scaleRatio, params.scaleRatio).animate(_animationController),
+    //   // Scale animation for the third card
+    //   biTween(1.0, params.scaleRatio).animate(_animationController),
+    //   // Scale animation for the second card
+    //   biTween(params.scaleRatio, 1.0).animate(_animationController),
+    // ];
+    */
+
+    positionAnimations = [biTween(firstPos, secondPos).animate(_animationController)];
+    opacityAnimations = [biTween(params.minimumOpacity, params.minimumOpacity).animate(_animationController)];
+    scaleAnimations = [biTween(params.scaleRatio, params.scaleRatio).animate(_animationController)];
+
+    if (forward) {
+      positionAnimations.add(biTween(secondPos, thirdPos).animate(_animationController));
+      positionAnimations.add(biTween(thirdPos, firstPos).animate(_animationController));
+      opacityAnimations.add(biTween(params.minimumOpacity, params.maximumOpacity).animate(_animationController));
+      opacityAnimations.add(biTween(params.maximumOpacity, params.minimumOpacity).animate(_animationController));
+      scaleAnimations.add(biTween(params.scaleRatio, 1.0).animate(_animationController));
+      scaleAnimations.add(biTween(1.0, params.scaleRatio).animate(_animationController));
+    } else {
+      positionAnimations.add(biTween(thirdPos, firstPos).animate(_animationController));
+      positionAnimations.add(biTween(secondPos, thirdPos).animate(_animationController));
+      opacityAnimations.add(biTween(params.maximumOpacity, params.minimumOpacity).animate(_animationController));
+      opacityAnimations.add(biTween(params.minimumOpacity, params.maximumOpacity).animate(_animationController));
+      scaleAnimations.add(biTween(1.0, params.scaleRatio).animate(_animationController));
+      scaleAnimations.add(biTween(params.scaleRatio, 1.0).animate(_animationController));
+    }
   }
 
   /// Helper to calculate the position of the first card
@@ -313,7 +360,7 @@ class StackedTrioCarouselController {
     _swipingMethod = SwipingMethod.userDriven; // Set swiping method to user-driven
 
     bool swipingRTL = details.delta.dx < 0;
-    bool leftOfCenter = (_widgetOffset.dx + _widgetSize.width / 2) < details.globalPosition.dx;
+    bool leftOfCenter = (_widgetOffset.dx + _widgetSize.width / 2) > details.globalPosition.dx;
 
     SwipingDirection newSwipingDirection = leftOfCenter ? SwipingDirection.rtl : SwipingDirection.ltr;
 
@@ -321,6 +368,7 @@ class StackedTrioCarouselController {
       _swipingDirection = newSwipingDirection;
       updateAnimations(params);
     }
+
     // Determine swipe direction and update state
     if (_isSwipingforward != swipingRTL) {
       _hasPassedMid = false; // Reset mid-swipe state

@@ -43,9 +43,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void initState() {
     _carouselController = StackedTrioCarouselController(
       tickerProvider: this,
-      animationDuration: const Duration(milliseconds: 4000),
+      animationDuration: const Duration(milliseconds: 800),
       autoPlayInterval: const Duration(seconds: 2),
-      autoPlay: true,
+      swipingDirection: SwipingDirection.rtl,
+      autoPlay: false,
     );
     super.initState();
   }
