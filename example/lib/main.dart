@@ -45,8 +45,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       tickerProvider: this,
       animationDuration: const Duration(milliseconds: 800),
       autoPlayInterval: const Duration(seconds: 2),
-      swipingDirection: SwipingDirection.rtl,
-      autoPlay: true,
+      swipingDirection: SwipingDirection.ltr,
+      autoPlay: false,
     );
     super.initState();
   }
@@ -65,6 +65,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               height: 400, // affects the distance between the two background elements
             ),
             params: StackedTrioCarouselParams(
+              minimumOpacity: 0.5,
+              maximumOpacity: 1,
               cardHeight: 200,
               cardWidth: 200,
               scaleRatio: 0.8,
@@ -96,9 +98,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ),
           ElevatedButton(
             onPressed: () {
-              _carouselController.autoPlay
-                  ? _carouselController.stopAutoPlay()
-                  : _carouselController.startAutoPlay();
+              _carouselController.autoPlay ? _carouselController.stopAutoPlay() : _carouselController.startAutoPlay();
               setState(() {});
             },
             child: Text(

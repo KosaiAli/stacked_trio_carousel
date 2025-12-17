@@ -75,10 +75,10 @@ class StackedTrioCarouselController {
   SwipingDirection get swipingDirection => _swipingDirection;
 
   /// Flag indicating the swiping direction (forward or backward)
-  bool _isSwipingforward = false;
+  bool _isAnimating = false;
 
   /// Getter for whether the swiping is forward
-  bool get isSwipingforward => _isSwipingforward;
+  bool get isSwipingforward => _isAnimating;
 
   /// Flag indicating if the card has been swapped during a swipe
   bool _cardSwapped = false;
@@ -98,8 +98,7 @@ class StackedTrioCarouselController {
   /// Getter for whether auto-play is active
   bool get autoPlay => _autoPlay;
 
-  bool get isAnimationCompleted =>
-      _animationController.status == AnimationStatus.completed;
+  bool get isAnimationCompleted => _animationController.status == AnimationStatus.completed;
 
   /// Constructor for the controller
   /// - [tickerProvider] is required for animations
@@ -117,7 +116,7 @@ class StackedTrioCarouselController {
     _animationController = AnimationController(
       // lowerBound: -1,
       value: 0,
-      upperBound: 1,
+      // upperBound: 1,
       vsync: tickerProvider,
       duration: animationDuration,
     )
@@ -137,18 +136,18 @@ class StackedTrioCarouselController {
   void _animationListener() {
     // Notify the listener about animation progress
     onAnimationProgress?.call(_animationController.value);
-    // print(_swipingDirection);
+    print(_swipingDirection);
     switch (_swipingMethod) {
       case SwipingMethod.animationDriven:
         // Update halfway point flag for animation-driven swiping
-        if (_animationController.value.abs() > 0.5 && !_hasPassedMid) {
+        if (_animationController.value > 0.5 && !_hasPassedMid) {
           _hasPassedMid = true;
         }
         break;
       case SwipingMethod.userDriven:
         // Update halfway point flag based on swiping direction
-        if (_isSwipingforward) {
-          if (_animationController.value.abs() > 0.5 && !_hasPassedMid) {
+        if (_isAnimating) {
+          if (_animationController.value > 0.5 && !_hasPassedMid) {
             _hasPassedMid = true;
           }
         } else {
@@ -167,13 +166,13 @@ class StackedTrioCarouselController {
       _hasPassedMid = false;
       if (_swipingMethod == SwipingMethod.userDriven) {
         // TODO: Fix the behaviour
-        if (_isSwipingforward && !_cardSwapped && _animationController.value.abs() == 1) {
+        if (_isAnimating && !_cardSwapped && _animationController.value == 1) {
           onAnimationEnd?.call();
           _cardSwapped = true; // Mark that the card has been swapped
           _animationController.value = 0;
         }
       } else {
-        if (_animationController.value.abs() == 1) {
+        if (_animationController.value == 1) {
           onAnimationEnd?.call();
           _animationController.value = 0;
         }
@@ -197,7 +196,9 @@ class StackedTrioCarouselController {
   }
 
   void updateAnimations(StackedTrioCarouselParams params) {
+    
     bool forward = (_swipingDirection == SwipingDirection.rtl);
+    // print("=================FORWARD : $forward");
     // bool forward = false;
 
     final firstPos = _firstCardPosition(
@@ -212,7 +213,7 @@ class StackedTrioCarouselController {
 
     final thirdPos = _centerPoint;
 
-    Tween<T> biTween<T>(T a, T b) => Tween(begin: a, end: b);
+    Tween<T> biTween<T>(T a, T b) => Tween(begin: a, end: b); //?
     if (forward) {
       positionAnimations = [
         biTween(firstPos, secondPos).animate(_animationController),
@@ -270,9 +271,7 @@ class StackedTrioCarouselController {
   void startAutoPlay() {
     _stopTimer(); // Ensure no duplicate timers
     _timer = Timer.periodic(autoPlayInterval, (_) {
-      _swipingDirection == SwipingDirection.rtl
-          ? next()
-          : previous(); // Automatically move to the next card
+      _swipingDirection == SwipingDirection.rtl ? next() : previous(); // Automatically move to the next card
     });
     _autoPlay = true;
     _swipingMethod = SwipingMethod.animationDriven;
@@ -319,38 +318,50 @@ class StackedTrioCarouselController {
     _hasPassedMid = false;
   }
 
+  double? swipeStartingPointdx;
+
   /// Updates animation progress based on user drag gestures
   void onUserInteractionUpdate(
-      DragUpdateDetails details, double cardWidth, StackedTrioCarouselParams params) {
+    DragUpdateDetails details,
+    double cardWidth,
+    StackedTrioCarouselParams params,
+  ) {
     _swipingMethod = SwipingMethod.userDriven; // Set swiping method to user-driven
 
     bool swipingRTL = details.delta.dx < 0;
-    bool leftOfCenter =
-        (_widgetOffset.dx + _widgetSize.width / 2) > details.globalPosition.dx;
-    SwipingDirection newSwipingDirection =
-        leftOfCenter ? SwipingDirection.rtl : SwipingDirection.ltr;
+    // bool leftOfCenter = (_widgetOffset.dx + _widgetSize.width / 2) > details.globalPosition.dx;
+    bool leftOfStartingPoint = swipeStartingPointdx! > details.globalPosition.dx;
+    SwipingDirection newSwipingDirection = leftOfStartingPoint ? SwipingDirection.rtl : SwipingDirection.ltr;
+
+    // print("\n------------\n-------------\n");
+    // print("swipingRTL = $swipingRTL");
+    // print("swipeStartingPointdx = ${swipeStartingPointdx!}");
+    // print("details.globalPosition.dx = ${details.globalPosition.dx}");
+    // print("leftOfStartingPoint = $leftOfStartingPoint");
+    // print("newSwipingDirection = $newSwipingDirection");
+    // print("\n-------------------------\n");
 
     if (newSwipingDirection != _swipingDirection) {
       _swipingDirection = newSwipingDirection;
-      _isSwipingforward = !_isSwipingforward;
+      _isAnimating = !_isAnimating;
       updateAnimations(params);
     }
 
     // Determine swipe direction and update state
-    if (_isSwipingforward != swipingRTL) {
+    if (_isAnimating != swipingRTL) {
       _hasPassedMid = false; // Reset mid-swipe state
     }
     // Update swiping direction
 
     if (!_cardSwapped) {
-      double value = 1 - (details.globalPosition.dx / cardWidth);
-      if (leftOfCenter) {
-        value =
-            1 - (details.globalPosition.dx / cardWidth); // Calculate new animation value
-      } else {
-        value = -(1 - (details.globalPosition.dx / cardWidth));
-      }
-      _animationController.value = value; // Clamp value between 0 and 1
+      double value = 1 - (details.globalPosition.dx / swipeStartingPointdx!);
+      // if (leftOfStartingPoint) {
+      //   value =
+      //       1 - (details.globalPosition.dx / cardWidth); // Calculate new animation value
+      // } else {
+      //   value = -(1 - (details.globalPosition.dx / cardWidth));
+      // }
+      _animationController.value = leftOfStartingPoint ? value : -value; // Clamp value between 0 and 1
     }
   }
 
@@ -370,11 +381,11 @@ class StackedTrioCarouselController {
     _swipingMethod = SwipingMethod.animationDriven;
 
     // Check if the swipe was significant enough to trigger an animation
-    if (_animationController.value.abs() > 0.5 && _animationController.value != 1) {
+    if (_animationController.value > 0.5 && _animationController.value != 1) {
       _animationController.animateTo(1).then(
         (value) {
           _hasPassedMid = false; // Reset mid-swipe state=
-          _isSwipingforward = false;
+          _isAnimating = false;
           if (_autoPlay) {
             _swipingMethod = SwipingMethod.animationDriven;
           } else {
@@ -382,7 +393,7 @@ class StackedTrioCarouselController {
           }
         },
       );
-    } else if (_animationController.value.abs() < 0.5) {
+    } else if (_animationController.value < 0.5) {
       _animationController.animateTo(0).then(
         (value) {
           _hasPassedMid = false; // Reset mid-swipe state

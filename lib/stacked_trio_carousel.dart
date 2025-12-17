@@ -282,11 +282,13 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   /// Handles the end of a swipe gesture
   void _onPanEnd(DragEndDetails details) {
     _controller.onUserInteractionEnd();
+    _controller.swipeStartingPointdx = null;
   }
 
   /// Handles the cancellation of a swipe gesture
   void _onPanCancel() {
     _controller.onUserInteractionCancel();
+    _controller.swipeStartingPointdx = null;
   }
 
   /// Handles the update of a swipe gesture
@@ -295,8 +297,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   }
 
   /// Handles the start of a swipe gesture
-  void _onPanDown(DragDownDetails _) {
+  void _onPanDown(DragDownDetails dragDownDetails) {
     _controller.onUserInteractionStart();
+    _controller.swipeStartingPointdx = dragDownDetails.globalPosition.dx;
   }
 
   @override
