@@ -14,7 +14,7 @@ enum SwipingDirection {
   rtl,
 
   /// Swiping from Left to Right
-  ltr
+  ltr,
 }
 
 /// Controller class for managing the StackedTrioCarousel
@@ -31,12 +31,6 @@ class StackedTrioCarouselController {
 
   /// Timer for enabling auto-play functionality
   Timer? _timer;
-
-  // /// Current index of the active card in the carousel
-  // int _currentIndex = 0;
-
-  // /// Getter for the current index of the active card
-  // int get currentIndex => _currentIndex;
 
   /// Duration for the animation between cards
   final Duration animationDuration;
@@ -70,12 +64,6 @@ class StackedTrioCarouselController {
   /// Getter for whether the swiping is forward
   bool get isSwipingforward => _isAnimating;
 
-  /// Flag indicating if the card has been swapped during a swipe
-  bool _cardSwapped = false;
-
-  /// Getter for whether the card has been swapped
-  bool get cardSwapped => _cardSwapped;
-
   /// Flag for enabling/disabling auto-play
   bool _autoPlay = true;
 
@@ -98,15 +86,16 @@ class StackedTrioCarouselController {
     bool autoPlay = true,
   }) {
     _swipingDirection = swipingDirection;
-    _animationController = AnimationController(
-      lowerBound: 0,
-      value: 0.5,
-      upperBound: 1,
-      vsync: tickerProvider,
-      duration: animationDuration,
-    )
-      ..addStatusListener(animationStatusListener)
-      ..addListener(_animationListener);
+    _animationController =
+        AnimationController(
+            lowerBound: 0,
+            value: 0.5,
+            upperBound: 1,
+            vsync: tickerProvider,
+            duration: animationDuration,
+          )
+          ..addStatusListener(animationStatusListener)
+          ..addListener(_animationListener);
 
     _autoPlay = autoPlay;
     if (_autoPlay) {
@@ -121,68 +110,13 @@ class StackedTrioCarouselController {
   void _animationListener() {
     // Notify the listener about animation progress
     onAnimationProgress?.call(_animationController.value);
-
-    switch (_swipingMethod) {
-      case SwipingMethod.animationDriven:
-        _animatingForward = true;
-        // Update halfway point flag for animation-driven swiping
-        if (_animationController.value > 0.75) {
-          if (!_cardSwapped) {
-            _cardSwapped = true;
-          }
-        }
-
-        break;
-      case SwipingMethod.userDriven:
-        if (_animatingForward) {
-          if (_animationController.value > 0.75) {
-            if (!_cardSwapped) {
-              _cardSwapped = true;
-            }
-          }
-          if (_animationController.value < 0.75 && _animationController.value > 0.25) {
-            if (!_cardSwapped) {
-              _cardSwapped = true;
-            }
-          }
-        } else {
-          if (_animationController.value < 0.75 && _animationController.value > 0.25) {
-            if (!_cardSwapped) {
-              _cardSwapped = true;
-            }
-          }
-          if (_animationController.value < 0.25) {
-            if (!_cardSwapped) {
-              _cardSwapped = true;
-            }
-          }
-        }
-
-      // if(_animationController.value < 0.75 && _animationController.value > 0.5){
-      //   if (!_cardSwapped && !_hasPassedMid[1]) {
-      //     _hasPassedMid[1] = true;
-      //   } else if (cardSwapped && hasPassedMid[1]) {
-      //     _hasPassedMid[1] = false;
-      //   }
-      // }
-      // Update halfway point flag based on swiping direction
-      // if (_isAnimating) {
-      //   if (_animationController.value > 0.5 && !_hasPassedMid) {
-      //     _hasPassedMid = true;
-      //   }
-      // } else {
-      //   // if (_animationController.value < 0.5 && _hasPassedMid) {
-      //   //   _hasPassedMid = true; // is indeed true :D
-      //   // }
-      // }
-    }
   }
 
   /// Listener for animation status changes
   void animationStatusListener(AnimationStatus status) {
-    if (status == AnimationStatus.forward) {
+    if (status == .forward) {
       onAnimationStart?.call();
-    } else if (status == AnimationStatus.completed) {
+    } else if (status == .completed) {
       if (_animationController.value == 0 || _animationController.value == 1) {
         onAnimationEnd?.call(_animationController.value == 0);
         _isAnimating = false; // Mark that the card has been swapped
@@ -200,102 +134,106 @@ class StackedTrioCarouselController {
     final xCenterPoint = (widgetSize.width - params.cardWidth) / 2;
     final yCenterPoint = (widgetSize.height - params.cardHeight) / 2;
     _centerPoint = Offset(xCenterPoint, yCenterPoint);
-    // Position animation for the first card
-    bool forward = (_swipingDirection == SwipingDirection.rtl);
-    updateAnimations(params, forward);
-  }
-
-  void updateAnimations(StackedTrioCarouselParams params, bool forward) {
-    // print("=================FORWARD : $forward");
-    // bool forward = false;
 
     final firstPos = _firstCardPosition(
       padding: params.padding,
       angle: params.angle,
+      offset: 10,
     );
 
     final secondPos = _secondCardPosition(
       padding: params.padding,
       angle: params.angle,
+      offset: 10,
     );
 
     final thirdPos = _centerPoint;
 
-    Tween<T> biTween<T>(T a, T b) => Tween(begin: a, end: b); //?
-    // if (forward) {
     positionAnimations = [
       TweenSequence<Offset>([
-        TweenSequenceItem(tween: biTween(thirdPos, firstPos), weight: 50),
-        TweenSequenceItem(tween: biTween(firstPos, secondPos), weight: 50),
+        TweenSequenceItem(
+          tween: Tween(begin: thirdPos, end: firstPos),
+          weight: 50,
+        ),
+        TweenSequenceItem(
+          tween: Tween(begin: firstPos, end: secondPos),
+          weight: 50,
+        ),
       ]).animate(_animationController),
       TweenSequence<Offset>([
-        TweenSequenceItem(tween: biTween(firstPos, secondPos), weight: 50),
-        TweenSequenceItem(tween: biTween(secondPos, thirdPos), weight: 50),
+        TweenSequenceItem(
+          tween: Tween(begin: firstPos, end: secondPos),
+          weight: 50,
+        ),
+        TweenSequenceItem(
+          tween: Tween(begin: secondPos, end: thirdPos),
+          weight: 50,
+        ),
       ]).animate(_animationController),
       TweenSequence<Offset>([
-        TweenSequenceItem(tween: biTween(secondPos, thirdPos), weight: 50),
-        TweenSequenceItem(tween: biTween(thirdPos, firstPos), weight: 50),
+        TweenSequenceItem(
+          tween: Tween(begin: secondPos, end: thirdPos),
+          weight: 50,
+        ),
+        TweenSequenceItem(
+          tween: Tween(begin: thirdPos, end: firstPos),
+          weight: 50,
+        ),
       ]).animate(_animationController),
-      // biTween(firstPos, secondPos).animate(_animationController),
-      // biTween(secondPos, thirdPos).animate(_animationController),
-
-      // biTween(thirdPos, firstPos).animate(_animationController),
     ];
-    // } else {
-    //   positionAnimations = [
-    //     biTween(secondPos, firstPos).animate(_animationController),
-    //     biTween(firstPos, thirdPos).animate(_animationController),
-    //     biTween(thirdPos, secondPos).animate(_animationController),
-    //   ];
-    // }
 
     scaleAnimations = [
       TweenSequence<double>([
-        TweenSequenceItem(tween: biTween(1.0, params.scaleRatio), weight: 50),
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: params.scaleRatio), weight: 50),
         TweenSequenceItem(
-            tween: biTween(params.scaleRatio, params.scaleRatio), weight: 50),
+          tween: Tween(begin: params.scaleRatio, end: params.scaleRatio),
+          weight: 50,
+        ),
       ]).animate(_animationController),
       TweenSequence<double>([
         TweenSequenceItem(
-            tween: biTween(params.scaleRatio, params.scaleRatio), weight: 50),
-        TweenSequenceItem(tween: biTween(params.scaleRatio, 1.0), weight: 50),
+          tween: Tween(begin: params.scaleRatio, end: params.scaleRatio),
+          weight: 50,
+        ),
+        TweenSequenceItem(tween: Tween(begin: params.scaleRatio, end: 1.0), weight: 50),
       ]).animate(_animationController),
       TweenSequence<double>([
-        TweenSequenceItem(tween: biTween(params.scaleRatio, 1.0), weight: 50),
-        TweenSequenceItem(tween: biTween(1.0, params.scaleRatio), weight: 50),
+        TweenSequenceItem(tween: Tween(begin: params.scaleRatio, end: 1.0), weight: 50),
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: params.scaleRatio), weight: 50),
       ]).animate(_animationController),
-      // Scale animation for the first card
-      // Scale animation for the third card
-
-      // Scale animation for the second card
     ];
 
     opacityAnimations = [
       TweenSequence<double>([
         TweenSequenceItem(
-            tween: biTween(params.maximumOpacity, params.minimumOpacity), weight: 50),
+          tween: Tween(begin: params.maximumOpacity, end: params.minimumOpacity),
+          weight: 50,
+        ),
         TweenSequenceItem(
-            tween: biTween(params.minimumOpacity, params.minimumOpacity), weight: 50),
+          tween: Tween(begin: params.minimumOpacity, end: params.minimumOpacity),
+          weight: 50,
+        ),
       ]).animate(_animationController),
       TweenSequence<double>([
         TweenSequenceItem(
-            tween: biTween(params.minimumOpacity, params.minimumOpacity), weight: 50),
+          tween: Tween(begin: params.minimumOpacity, end: params.minimumOpacity),
+          weight: 50,
+        ),
         TweenSequenceItem(
-            tween: biTween(params.minimumOpacity, params.maximumOpacity), weight: 50),
+          tween: Tween(begin: params.minimumOpacity, end: params.maximumOpacity),
+          weight: 50,
+        ),
       ]).animate(_animationController),
       TweenSequence<double>([
         TweenSequenceItem(
-            tween: biTween(params.minimumOpacity, params.maximumOpacity), weight: 50),
+          tween: Tween(begin: params.minimumOpacity, end: params.maximumOpacity),
+          weight: 50,
+        ),
         TweenSequenceItem(
-            tween: biTween(params.maximumOpacity, params.minimumOpacity), weight: 50),
+          tween: Tween(begin: params.maximumOpacity, end: params.minimumOpacity),
+          weight: 50,
+        ),
       ]).animate(_animationController),
-      // Opacity animation for the third card
-      // Opacity animation for the first card
-      // biTween(params.minimumOpacity, params.minimumOpacity).animate(_animationController),
-      // Opacity animation for the second card
-      // biTween(params.minimumOpacity, params.maximumOpacity).animate(_animationController),
-
-      // biTween(params.maximumOpacity, params.minimumOpacity).animate(_animationController),
     ];
   }
 
@@ -303,9 +241,12 @@ class StackedTrioCarouselController {
   Offset _firstCardPosition({
     required EdgeInsets padding,
     required double angle,
+    required double offset,
   }) {
-    final xCord = _centerPoint.dx * (1 - math.cos(angle)) + padding.horizontal;
-    final yCord = _centerPoint.dy * (1 - math.sin(angle)) + padding.vertical;
+    final xCord =
+        _centerPoint.dx * (1 - math.cos(angle)) - padding.horizontal * math.cos(angle);
+    final yCord =
+        _centerPoint.dy * (1 - math.sin(angle)) - padding.vertical * math.sin(angle);
     return Offset(xCord, yCord); // Adjust position based on scale ratio and padding
   }
 
@@ -313,9 +254,12 @@ class StackedTrioCarouselController {
   Offset _secondCardPosition({
     required EdgeInsets padding,
     required double angle,
+    required double offset,
   }) {
-    final xCord = _centerPoint.dx * (1 + math.cos(angle)) - padding.horizontal;
-    final yCord = _centerPoint.dy * (1 + math.sin(angle)) - padding.vertical;
+    final xCord =
+        _centerPoint.dx * (1 + math.cos(angle)) + padding.horizontal * math.cos(angle);
+    final yCord =
+        _centerPoint.dy * (1 + math.sin(angle)) + padding.vertical * math.sin(angle);
     return Offset(xCord, yCord); // Adjust position based on scale ratio and padding
   }
 
@@ -365,19 +309,16 @@ class StackedTrioCarouselController {
   }
 
   /// Prepares for user interaction by stopping animations and auto-play
-  void onUserInteractionStart(double swipeStartingPointdx) {
+  void onUserInteractionStart(double swipeStartingPointdx, double swipeStartingPointdy) {
     _stopTimer();
     stopAnimation();
-    _cardSwapped = false;
 
     _swipeStartingPointdx = swipeStartingPointdx;
+    _swipeStartingPointdy = swipeStartingPointdy;
   }
 
   double? _swipeStartingPointdx;
-
-  // this will indicates if the animation is going from 0 to 1
-  // based on the user driven swipping method
-  bool _animatingForward = false;
+  double? _swipeStartingPointdy;
 
   /// Updates animation progress based on user drag gestures
   void onUserInteractionUpdate(
@@ -385,17 +326,18 @@ class StackedTrioCarouselController {
     double cardWidth,
     StackedTrioCarouselParams params,
   ) {
-    _swipingMethod = SwipingMethod.userDriven; // Set swiping method to user-driven
+    _swipingMethod = SwipingMethod.userDriven;
 
-    final delta = _swipeStartingPointdx! - details.globalPosition.dx;
-    final value = (0.5 + delta / _swipeStartingPointdx!).clamp(0.0, 1.0);
-    if (_animatingForward != details.delta.dx < 0) {
-      _cardSwapped = false;
-    }
-    _isAnimating = value != 1 && value != 0;
+    final dx = details.globalPosition.dx - _swipeStartingPointdx!;
+    final dy = details.globalPosition.dy - _swipeStartingPointdy!;
+
+    final projectedDelta = dx * math.cos(params.angle) + dy * math.sin(params.angle);
+
+    final value = (0.5 - projectedDelta / cardWidth).clamp(0.0, 1.0);
+
+    _isAnimating = value != 0.0 && value != 1.0;
 
     if (_isAnimating) {
-      _animatingForward = details.delta.dx < 0;
       _animationController.value = value;
     }
   }
@@ -403,7 +345,6 @@ class StackedTrioCarouselController {
   /// Handles cancellation of user interaction
   void onUserInteractionCancel() {
     _swipeStartingPointdx = null;
-    _cardSwapped = false; // Reset card swapped state
     _isAnimating = false;
     if (_autoPlay) {
       _swipingMethod = SwipingMethod.animationDriven;
@@ -414,22 +355,19 @@ class StackedTrioCarouselController {
 
   /// Handles the end of user interaction
   void onUserInteractionEnd() {
-    _cardSwapped = false; // Reset card swapped state
     _swipingMethod = SwipingMethod.animationDriven;
     _swipeStartingPointdx = null;
     _isAnimating = false;
     // Check if the swipe was significant enough to trigger an animation
     if (_animationController.value > 0.75) {
-      _animationController.animateTo(1).then(
-        (value) {
-          _isAnimating = false;
-          if (_autoPlay) {
-            _swipingMethod = SwipingMethod.animationDriven;
-          } else {
-            _swipingMethod = SwipingMethod.userDriven;
-          }
-        },
-      );
+      _animationController.animateTo(1).then((value) {
+        _isAnimating = false;
+        if (_autoPlay) {
+          _swipingMethod = SwipingMethod.animationDriven;
+        } else {
+          _swipingMethod = SwipingMethod.userDriven;
+        }
+      });
     } else if (_animationController.value < 0.25) {
       _animationController.animateTo(0);
     } else {

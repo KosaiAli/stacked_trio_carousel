@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:stacked_trio_carousel/stacked_trio_carousel.dart';
 
@@ -44,8 +46,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       tickerProvider: this,
       animationDuration: const Duration(seconds: 2),
       autoPlayInterval: const Duration(seconds: 2),
-      swipingDirection: SwipingDirection.rtl,
-      autoPlay: true,
+      swipingDirection: SwipingDirection.ltr,
+      autoPlay: false,
     );
     super.initState();
   }
@@ -69,27 +71,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               cardHeight: 200,
               cardWidth: 200,
               scaleRatio: 0.8,
-              angle: 0,
+              angle: pi / 4,
               // padding: EdgeInsets.symmetric(horizontal: 20),
             ),
             routeObserver: routeObserver,
             controller: _carouselController,
+            onTap: (index) {
+              print(_color[index]);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SecondScreen(),
+                  ));
+            },
             children: _color
                 .map(
-                  (color) => GestureDetector(
-                    key: ValueKey(color),
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SecondScreen(),
-                          ));
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
+                  (color) => Container(
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(25),
                     ),
                   ),
                 )

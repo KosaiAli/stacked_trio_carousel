@@ -5,7 +5,7 @@ homepage: https://github.com/KosaiAli/stacked_trio_carousel.git
 repository: https://github.com/KosaiAli/stacked_trio_carousel.git
 
 environment:
-  sdk: ^3.5.1
+  sdk: ^3.10.0
   flutter: ">=1.17.0"
 
 dependencies:
