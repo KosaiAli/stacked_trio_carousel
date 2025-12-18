@@ -1,10 +1,12 @@
 library;
 
 import 'dart:async';
+import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'stacked_trio_carousel_controller.dart';
+part 'stacked_trio_carousel_controller.dart';
 
 class StackedTrioCarousel extends StatefulWidget {
   const StackedTrioCarousel({
@@ -71,8 +73,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
         widget.controller ?? StackedTrioCarouselController(tickerProvider: this);
 
     _controller.onAnimationStart = _handleAnimationStart;
-    _controller.onAnimationEnd = _handleAnimationEnd;
+    _controller.onAnimationEnd = _rearrangeStackedCards;
     _controller.onAnimationProgress = _listenToAnimationChanges;
+    // _controller.onSwapCardRequired = _listentToSwapCardRequired;
 
     _children = List.from(widget.children);
 
@@ -196,14 +199,18 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   // The card overlays will be removed and reordered by removing the last card
   // and inserting it at index 0. This process regenerates the card with the
   // proper animation after resetting the animation controller.
-  void _rearrangeStackedCards() {
+  void _rearrangeStackedCards(bool finishedAtZero) {
+    log("_rearrangeStackedCards");
     for (var entry in _overlayEntries) {
       if (entry.mounted) {
         entry.remove(); // Remove mounted overlay entries
       }
     }
-
-    _children.insert(0, _children.removeLast());
+    if (finishedAtZero) {
+      _children.insert(2, _children.removeAt(0));
+    } else {
+      _children.insert(0, _children.removeLast());
+    }
     _generateStackedCards();
   }
 
@@ -282,13 +289,11 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   /// Handles the end of a swipe gesture
   void _onPanEnd(DragEndDetails details) {
     _controller.onUserInteractionEnd();
-    _controller.swipeStartingPointdx = null;
   }
 
   /// Handles the cancellation of a swipe gesture
   void _onPanCancel() {
     _controller.onUserInteractionCancel();
-    _controller.swipeStartingPointdx = null;
   }
 
   /// Handles the update of a swipe gesture
@@ -298,8 +303,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
 
   /// Handles the start of a swipe gesture
   void _onPanDown(DragDownDetails dragDownDetails) {
-    _controller.onUserInteractionStart();
-    _controller.swipeStartingPointdx = dragDownDetails.globalPosition.dx;
+    _controller.onUserInteractionStart(dragDownDetails.globalPosition.dx);
   }
 
   @override
@@ -307,23 +311,25 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     return CompositedTransformTarget(link: layerLink, child: widget.background);
   }
 
-  void _handleAnimationEnd() {
-    switch (_controller.swipingMethod) {
-      case SwipingMethod.animationDriven:
-        _rearrangeStackedCards();
-        break;
+  // void _handleAnimationEnd() {
+  //   print("animation ended");
+  //   switch (_controller.swipingMethod) {
+  //     case SwipingMethod.animationDriven:
+  //       _rearrangeStackedCards();
+  //       break;
 
-      case SwipingMethod.userDriven:
-        // For user-driven swiping, rearrange cards only if the swipe is forward and animation is completed
-        _rearrangeStackedCards(); // Rearrange the stacked cards
+  //     case SwipingMethod.userDriven:
+  //       // For user-driven swiping, rearrange cards only if the swipe is forward and animation is completed
+  //       _rearrangeStackedCards(); // Rearrange the stacked cards
 
-        break;
-    }
-  }
+  //       break;
+  //   }
+  // }
 
   void _handleAnimationStart() {}
 
   void _reinsertOverlayEntries(List<int> order) {
+    // print("_reinsertOverlayEntries");
     // Reinserts overlay entries in a new order for a smooth transition
     try {
       Overlay.of(context).insert(_overlayEntries[order[0]]);
@@ -351,56 +357,45 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   void _listenToAnimationChanges(double progress) {
     switch (_controller.swipingMethod) {
       case SwipingMethod.animationDriven:
-        // Check if the animation controller value indicates that the animation is past halfway
-        if (progress > 0.5) {
-          // Change the order of the card overlay entries so the animation appears smooth
-          // This block will only execute once when transitioning past the midpoint
-          if (!_controller.hasPassedMid) {
-            // Remove all overlay entries to prepare for re-insertion
-            for (var entry in _overlayEntries) {
-              if (entry.mounted) {
-                entry.remove(); // Remove mounted overlay entries
-              }
+        if (_controller._animationController.isAnimating) {
+          for (var entry in _overlayEntries) {
+            if (entry.mounted) {
+              entry.remove(); // Remove mounted overlay entries
             }
-
-            // _reinsertOverlayEntries([0, 1, 2]);
-
+          }
+          if (_controller._animationController.value < 0.25) {
+            _reinsertOverlayEntries([1, 2, 0]);
+          }
+          if (_controller._animationController.value > 0.25 &&
+              _controller._animationController.value < 0.75) {
+            _reinsertOverlayEntries([0, 1, 2]);
+          }
+          // Check if the animation controller value indicates that the animation is past halfway
+          if (_controller._animationController.value > 0.75) {
             _reinsertOverlayEntries([0, 2, 1]);
           }
         }
         break;
 
       case SwipingMethod.userDriven:
-        // Handle user-driven swiping logic
-
-        // Check if the user is swiping forward (to the left)
-        if (progress > 0.5) {
-          // Change order of overlay entries when swiping forward past the midpoint
-          if (!_controller.hasPassedMid) {
-            for (var entry in _overlayEntries) {
-              if (entry.mounted) {
-                entry.remove(); // Remove mounted overlay entries
-              } // Remove all entries for reordering
+        if (_controller._isAnimating) {
+          for (var entry in _overlayEntries) {
+            if (entry.mounted) {
+              entry.remove(); // Remove mounted overlay entries
             }
-
+          }
+          if (_controller._animationController.value < 0.25) {
+            _reinsertOverlayEntries([1, 2, 0]);
+          }
+          if (_controller._animationController.value > 0.25 &&
+              _controller._animationController.value < 0.75) {
+            _reinsertOverlayEntries([0, 1, 2]);
+          }
+          // Check if the animation controller value indicates that the animation is past halfway
+          if (_controller._animationController.value > 0.75) {
             _reinsertOverlayEntries([0, 2, 1]);
           }
         }
-        // If the user is swiping backward (to the right)
-        else if (progress < 0.5) {
-          // Change order of overlay entries when swiping backward past the midpoint
-          if (!_controller.hasPassedMid) {
-            for (var entry in _overlayEntries) {
-              if (entry.mounted) {
-                entry.remove(); // Remove mounted overlay entries
-              } // Remove all entries for reordering
-            }
-
-            // _reinsertOverlayEntries([0, 2, 1]);
-            _reinsertOverlayEntries([0, 1, 2]);
-          }
-        }
-
         break;
     }
   }

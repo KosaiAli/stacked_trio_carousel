@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stacked_trio_carousel/stacked_trio_carousel.dart';
-import 'package:stacked_trio_carousel/stacked_trio_carousel_controller.dart';
 
 final RouteObserver routeObserver = RouteObserver();
 
@@ -43,10 +42,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void initState() {
     _carouselController = StackedTrioCarouselController(
       tickerProvider: this,
-      animationDuration: const Duration(milliseconds: 800),
+      animationDuration: const Duration(seconds: 2),
       autoPlayInterval: const Duration(seconds: 2),
-      swipingDirection: SwipingDirection.ltr,
-      autoPlay: false,
+      swipingDirection: SwipingDirection.rtl,
+      autoPlay: true,
     );
     super.initState();
   }
@@ -98,7 +97,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ),
           ElevatedButton(
             onPressed: () {
-              _carouselController.autoPlay ? _carouselController.stopAutoPlay() : _carouselController.startAutoPlay();
+              _carouselController.autoPlay
+                  ? _carouselController.stopAutoPlay()
+                  : _carouselController.startAutoPlay();
               setState(() {});
             },
             child: Text(
