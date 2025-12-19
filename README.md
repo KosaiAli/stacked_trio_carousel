@@ -121,7 +121,7 @@ StackedTrioCarouselParams(
 
 <div style="display: flex; justify-content: space-around;">
   <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size.gif" width="300"/>
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/padding.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/apply_padding.gif" width="300"/>
 </div>
 
 ### Change Scale and Minimum Opacity
@@ -139,7 +139,7 @@ StackedTrioCarouselParams(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/padding.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/apply_padding.gif" width="300"/>
   <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/scale_and_opacity.gif" width="300"/>
 </div>
 
