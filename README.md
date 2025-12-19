@@ -7,7 +7,7 @@
 The carousel features one prominent card in the foreground and two cards in the background, making it perfect for showcasing content in a layered and dynamic way. With built-in animations and customizable properties, users can swipe through the cards or enable automatic transitions for a smooth and interactive experience.
 
 <div style="display: flex; justify-content: space-around;">
-<img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif" width="300"/>
+<img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/main.gif" width="300"/>
 </div>
 
 ## 🆕 What's New
@@ -103,7 +103,7 @@ StackedTrioCarouselParams(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/main.gif" width="300"/>
   <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size.gif" width="300"/>
 </div>
 
@@ -159,21 +159,21 @@ void initState() {
 controller: _carouselController,
 ```
 
-### Change Animation Duration
+### Change Animation speed
 
-You can modify the animation duration and the delay between animations.
+You can modify the animation speed and the delay between animations.
 
 ```dart
 _carouselController = StackedTrioCarouselController(
     tickerProvider: this,
-    animationDuration: const Duration(milliseconds: 200),
-    autoPlayInterval: const Duration(seconds: 1),
+    animationspeed: const speed(milliseconds: 200),
+    autoPlayInterval: const speed(seconds: 1),
 );
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif" width="300"/>
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/animation_duration.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/main.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/animation_speed.gif" width="300"/>
 </div>
 
 
@@ -186,14 +186,14 @@ You can use the `swipingDirection` parameter in the `StackedTrioCarouselControll
 ```dart
 _carouselController = StackedTrioCarouselController(
     tickerProvider: this,
-    animationDuration: const Duration(milliseconds: 200),
-    autoPlayInterval: const Duration(seconds: 1),
+    animationspeed: const speed(milliseconds: 200),
+    autoPlayInterval: const speed(seconds: 1),
     swipingDirection: .rtl,
 );
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/main.gif" width="300"/>
   <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/ltr.gif" width="300"/>
 </div>
 
@@ -221,8 +221,8 @@ To stop the automatic animation, set `autoPlay` to `false`.
 ```dart
 _carouselController = StackedTrioCarouselController(
     tickerProvider: this,
-    animationDuration: const Duration(milliseconds: 200),
-    autoPlayInterval: const Duration(seconds: 1),
+    animationspeed: const speed(milliseconds: 200),
+    autoPlayInterval: const speed(seconds: 1),
     autoPlay: false
 );
 ```
