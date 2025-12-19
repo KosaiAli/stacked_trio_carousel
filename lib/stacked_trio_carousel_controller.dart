@@ -27,6 +27,7 @@ class StackedTrioCarouselController {
   late List<Animation<double>> opacityAnimations;
   late List<Animation<double>> scaleAnimations;
 
+  /// Center of the main (middle) element
   late Offset _centerPoint;
 
   /// Timer for enabling auto-play functionality
@@ -56,6 +57,7 @@ class StackedTrioCarouselController {
   /// Direction of Swiping
   late SwipingDirection _swipingDirection;
 
+  /// Getter for the swiping Direction
   SwipingDirection get swipingDirection => _swipingDirection;
 
   /// Flag indicating the swiping direction (forward or backward)
@@ -70,13 +72,17 @@ class StackedTrioCarouselController {
   /// Getter for whether auto-play is active
   bool get autoPlay => _autoPlay;
 
-  bool get isAnimationCompleted =>
-      _animationController.status == AnimationStatus.completed;
+  /// Determine the PanDown location on the x-axis
+  double? _swipeStartingPointdx;
+
+  /// Determine the PanDown location on the y-axis
+  double? _swipeStartingPointdy;
 
   /// Constructor for the controller
   /// - [tickerProvider] is required for animations
-  /// - [animationDuration] defines the transition duration
-  /// - [autoPlayInterval] defines the interval for auto-play
+  /// - [animationDuration] determines the transition duration
+  /// - [autoPlayInterval] determines the interval for auto-play
+  /// - [swipingDirection] determines the swiping direction of the autoplay
   /// - [autoPlay] specifies whether auto-play is enabled by default
   StackedTrioCarouselController({
     required TickerProvider tickerProvider,
@@ -114,9 +120,9 @@ class StackedTrioCarouselController {
 
   /// Listener for animation status changes
   void animationStatusListener(AnimationStatus status) {
-    if (status == .forward) {
+    if (status == AnimationStatus.forward) {
       onAnimationStart?.call();
-    } else if (status == .completed) {
+    } else if (status == AnimationStatus.completed) {
       if (_animationController.value == 0 || _animationController.value == 1) {
         onAnimationEnd?.call(_animationController.value == 0);
         _isAnimating = false; // Mark that the card has been swapped
@@ -135,17 +141,9 @@ class StackedTrioCarouselController {
     final yCenterPoint = (widgetSize.height - params.cardHeight) / 2;
     _centerPoint = Offset(xCenterPoint, yCenterPoint);
 
-    final firstPos = _firstCardPosition(
-      padding: params.padding,
-      angle: params.angle,
-      offset: 10,
-    );
+    final firstPos = _firstCardPosition(padding: params.padding, angle: params.angle);
 
-    final secondPos = _secondCardPosition(
-      padding: params.padding,
-      angle: params.angle,
-      offset: 10,
-    );
+    final secondPos = _secondCardPosition(padding: params.padding, angle: params.angle);
 
     final thirdPos = _centerPoint;
 
@@ -238,28 +236,22 @@ class StackedTrioCarouselController {
   }
 
   /// Helper to calculate the position of the first card
-  Offset _firstCardPosition({
-    required EdgeInsets padding,
-    required double angle,
-    required double offset,
-  }) {
-    final xCord =
-        _centerPoint.dx * (1 - math.cos(angle)) - padding.horizontal * math.cos(angle);
-    final yCord =
-        _centerPoint.dy * (1 - math.sin(angle)) - padding.vertical * math.sin(angle);
+  Offset _firstCardPosition({required EdgeInsets padding, required double angle}) {
+    final orientedHorizontalPadding = padding.horizontal * math.cos(angle);
+    final orientedVerticalPadding = padding.horizontal * math.sin(angle);
+
+    final xCord = _centerPoint.dx * (1 - math.cos(angle)) - orientedHorizontalPadding;
+    final yCord = _centerPoint.dy * (1 - math.sin(angle)) - orientedVerticalPadding;
     return Offset(xCord, yCord); // Adjust position based on scale ratio and padding
   }
 
   /// Helper to calculate the position of the second card
-  Offset _secondCardPosition({
-    required EdgeInsets padding,
-    required double angle,
-    required double offset,
-  }) {
-    final xCord =
-        _centerPoint.dx * (1 + math.cos(angle)) + padding.horizontal * math.cos(angle);
-    final yCord =
-        _centerPoint.dy * (1 + math.sin(angle)) + padding.vertical * math.sin(angle);
+  Offset _secondCardPosition({required EdgeInsets padding, required double angle}) {
+    final orientedHorizontalPadding = padding.horizontal * math.cos(angle);
+    final orientedVerticalPadding = padding.horizontal * math.sin(angle);
+
+    final xCord = _centerPoint.dx * (1 + math.cos(angle)) + orientedHorizontalPadding;
+    final yCord = _centerPoint.dy * (1 + math.sin(angle)) + orientedVerticalPadding;
     return Offset(xCord, yCord); // Adjust position based on scale ratio and padding
   }
 
@@ -267,10 +259,9 @@ class StackedTrioCarouselController {
   void startAutoPlay() {
     _stopTimer(); // Ensure no duplicate timers
     _timer = Timer.periodic(autoPlayInterval, (_) {
-      _swipingDirection == SwipingDirection.rtl
-          ? next()
-          : previous(); // Automatically move to the next card
+      _swipingDirection == SwipingDirection.rtl ? next() : previous(); // Automatically move to the next card
     });
+    // resume autoplay behaviour
     _autoPlay = true;
     _swipingMethod = SwipingMethod.animationDriven;
   }
@@ -290,7 +281,6 @@ class StackedTrioCarouselController {
   /// Animates to the next card in the carousel
   void next() {
     if (!_animationController.isAnimating) {
-      // _currentIndex = (_currentIndex + 1) % 3; // Circular logic for 3 cards
       _animationController.animateTo(1);
     }
   }
@@ -298,7 +288,6 @@ class StackedTrioCarouselController {
   /// Animates to the previous card in the carousel
   void previous() {
     if (!_animationController.isAnimating) {
-      // _currentIndex = (_currentIndex - 1 + 3) % 3; // Circular logic for 3 cards
       _animationController.animateTo(0);
     }
   }
@@ -312,22 +301,15 @@ class StackedTrioCarouselController {
   void onUserInteractionStart(double swipeStartingPointdx, double swipeStartingPointdy) {
     _stopTimer();
     stopAnimation();
-
     _swipeStartingPointdx = swipeStartingPointdx;
     _swipeStartingPointdy = swipeStartingPointdy;
   }
 
-  double? _swipeStartingPointdx;
-  double? _swipeStartingPointdy;
-
   /// Updates animation progress based on user drag gestures
-  void onUserInteractionUpdate(
-    DragUpdateDetails details,
-    double cardWidth,
-    StackedTrioCarouselParams params,
-  ) {
+  void onUserInteractionUpdate(DragUpdateDetails details, double cardWidth, StackedTrioCarouselParams params) {
     _swipingMethod = SwipingMethod.userDriven;
 
+    // Calculating the Difference between global and local components
     final dx = details.globalPosition.dx - _swipeStartingPointdx!;
     final dy = details.globalPosition.dy - _swipeStartingPointdy!;
 
@@ -358,7 +340,7 @@ class StackedTrioCarouselController {
     _swipingMethod = SwipingMethod.animationDriven;
     _swipeStartingPointdx = null;
     _isAnimating = false;
-    // Check if the swipe was significant enough to trigger an animation
+    // Check if the animation has passed the halfway mark both ways
     if (_animationController.value > 0.75) {
       _animationController.animateTo(1).then((value) {
         _isAnimating = false;
@@ -370,6 +352,8 @@ class StackedTrioCarouselController {
       });
     } else if (_animationController.value < 0.25) {
       _animationController.animateTo(0);
+
+      // Return To Center
     } else {
       _animationController.animateTo(0.5);
     }

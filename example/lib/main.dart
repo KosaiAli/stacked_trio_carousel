@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void initState() {
     _carouselController = StackedTrioCarouselController(
       tickerProvider: this,
-      animationDuration: const Duration(seconds: 2),
+      animationDuration: const Duration(milliseconds: 800),
       autoPlayInterval: const Duration(seconds: 2),
       swipingDirection: SwipingDirection.ltr,
       autoPlay: false,
@@ -63,10 +63,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         children: [
           StackedTrioCarousel(
             background: Container(
-              height: 400, // affects the distance between the two background elements
+              height: 400,
+              width: 400, // affects the distance between the two background elements
             ),
             params: StackedTrioCarouselParams(
-              minimumOpacity: 0.5,
+              minimumOpacity: 0.1,
               maximumOpacity: 1,
               cardHeight: 200,
               cardWidth: 200,
@@ -77,7 +78,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             routeObserver: routeObserver,
             controller: _carouselController,
             onTap: (index) {
-              print(_color[index]);
               Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -97,9 +97,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ),
           ElevatedButton(
             onPressed: () {
-              _carouselController.autoPlay
-                  ? _carouselController.stopAutoPlay()
-                  : _carouselController.startAutoPlay();
+              _carouselController.autoPlay ? _carouselController.stopAutoPlay() : _carouselController.startAutoPlay();
               setState(() {});
             },
             child: Text(

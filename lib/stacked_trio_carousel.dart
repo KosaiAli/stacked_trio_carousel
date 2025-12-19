@@ -51,26 +51,38 @@ class StackedTrioCarousel extends StatefulWidget {
   /// and managed by the widget.
   final StackedTrioCarouselController? controller;
 
+  /// Element onTap Override.
+  ///
+  /// Takes the index of the element that the user taps.
   final Function(int index)? onTap;
 
   @override
   State<StackedTrioCarousel> createState() => _StackedTrioCarouselState();
 }
 
-class _StackedTrioCarouselState extends State<StackedTrioCarousel>
-    with TickerProviderStateMixin, RouteAware {
+class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerProviderStateMixin, RouteAware {
+  late StackedTrioCarouselController _controller;
+
   // Caching overlay entries to manage their visibility and order
   final List<OverlayEntry> _overlayEntries = [];
 
   // Caching children to manage their order
   late List<Widget> _children;
 
-  late StackedTrioCarouselController _controller;
+  // Caching current order of elements to mitigate reinserting items on every frame
+  List<int> currentOrder = [];
+
+  // Establishes a coordinate bridge between the background (Target) and the Element (Follower)
+  final LayerLink layerLink = LayerLink();  
+  
+  @protected
+  void _handleAnimationStart() {
+     /* Might Come in Handy Later */
+  }
 
   @override
   void initState() {
-    _controller =
-        widget.controller ?? StackedTrioCarouselController(tickerProvider: this);
+    _controller = widget.controller ?? StackedTrioCarouselController(tickerProvider: this);
 
     _controller.onAnimationStart = _handleAnimationStart;
     _controller.onAnimationEnd = _listenToAnimationEnd;
@@ -86,11 +98,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
         final size = renderBox!.size;
         Offset widgetOffset = renderBox.localToGlobal(Offset.zero);
 
-        _controller.initializeAnimations(
-          params: widget.params,
-          widgetSize: size,
-          widgetOffset: widgetOffset,
-        );
+        _controller.initializeAnimations(params: widget.params, widgetSize: size, widgetOffset: widgetOffset);
       } catch (e, st) {
         debugPrint(
           '[StackedTrioCarousel:initState] Failed to initialize layout or animations.\n'
@@ -102,6 +110,11 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     });
 
     super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CompositedTransformTarget(link: layerLink, child: widget.background);
   }
 
   @override
@@ -135,18 +148,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
       }
     }
 
-    for (var entry in _overlayEntries) {
-      try {
-        if (entry.mounted) {
-          entry.remove(); // Remove mounted overlay entries
-        } // Remove each overlay entry from the overlay
-      } catch (e, st) {
-        debugPrint(
-          '[StackedTrioCarousel:OverlayEntries] Failed to remove entry: $entry'
-          'Error: $e\n$st',
-        );
-      }
-    }
+    _removeOverlayEntries();
     _controller.dispose();
     super.dispose();
   }
@@ -154,9 +156,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   @override
   void didPopNext() {
     if (_controller._autoPlay) {
-      _controller.swipingDirection == SwipingDirection.rtl
-          ? _controller.next()
-          : _controller.previous();
+      _controller.swipingDirection == SwipingDirection.rtl ? _controller.next() : _controller.previous();
       _controller.startAutoPlay();
       return;
     }
@@ -166,26 +166,21 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   void didPushNext() {
     // Handle the event when this widget is pushed off the screen
     Future.delayed(
-      widget
-          .params
-          .disappearDuration, // Wait for the specified duration before disappearing
+      widget.params.disappearDuration, // Wait for the specified duration before disappearing
       () {},
     );
 
     super.didPushNext(); // Call the superclass method to ensure proper functionality
   }
 
-  // Rearranging the cards
-  // The animation is based on changing the animation assigned to each card.
-  // The card overlays will be removed and reordered by removing the last card
-  // and inserting it at index 0. This process regenerates the card with the
-  // proper animation after resetting the animation controller.
+  /// Rearranging the cards.
+  ///
+  /// The animation is based on changing the animation assigned to each card.
+  /// The card overlays will be removed and reordered by removing the last card
+  /// and inserting it at index 0. This process regenerates the card with the
+  /// proper animation after resetting the animation controller.
   void _listenToAnimationEnd(bool finishedAtZero) {
-    for (var entry in _overlayEntries) {
-      if (entry.mounted) {
-        entry.remove(); // Remove mounted overlay entries
-      }
-    }
+    _removeOverlayEntries();
     if (finishedAtZero) {
       _children.insert(2, _children.removeAt(0));
     } else {
@@ -208,9 +203,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
         ),
       );
       try {
-        Overlay.of(
-          context,
-        ).insert(_overlayEntries[i]); // Insert the overlay into the overlay stack
+        Overlay.of(context).insert(_overlayEntries[i]); // Insert the overlay into the overlay stack
       } catch (e, st) {
         debugPrint(
           '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[i]}'
@@ -219,8 +212,6 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
       }
     }
   }
-
-  final LayerLink layerLink = LayerLink();
 
   /// Creates an OverlayEntry for a stacked card with animations
   OverlayEntry _createOverlayEntry(
@@ -281,28 +272,51 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
 
   /// Handles the start of a swipe gesture
   void _onPanDown(DragDownDetails dragDownDetails) {
-    _controller.onUserInteractionStart(
-      dragDownDetails.globalPosition.dx,
-      dragDownDetails.globalPosition.dy,
-    );
+    _controller.onUserInteractionStart(dragDownDetails.globalPosition.dx, dragDownDetails.globalPosition.dy);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return CompositedTransformTarget(link: layerLink, child: widget.background);
+  /// Monitor Animation Changes
+  void _listenToAnimationChanges(double progress) {
+    if (_controller._animationController.isAnimating || _controller._isAnimating) {
+      // Check if the animation is past halfway both ways and in between
+      if (_controller._animationController.value < 0.25) {
+        _reinsertOverlayEntries([1, 2, 0]);
+        currentOrder = [1, 2, 0];
+      }
+      if (_controller._animationController.value > 0.75) {
+        _reinsertOverlayEntries([0, 2, 1]);
+        currentOrder = [0, 2, 1];
+      }
+      if (0.25 < _controller._animationController.value && _controller._animationController.value < 0.75) {
+        _reinsertOverlayEntries([0, 1, 2]);
+        currentOrder = [0, 1, 2];
+      }
+    }
   }
 
-  void _handleAnimationStart() {}
+  /// Bring non-main element to center if pressed, and run defined onTap logic on main element  
+  void _onTap(Widget child) {
+    int index = _children.indexOf(child);
+    if (child != _children.last && !_controller._animationController.isAnimating) {
+      if (index == 0) {
+        _controller.previous();
+      }
+      if (index == 1) {
+        _controller.next();
+      }
+      return;
+    }
+    widget.onTap?.call(index);
+  }
 
+  /// Update Overlay Entries by reinserting them
   void _reinsertOverlayEntries(List<int> order) {
+    
+    // Return if order didn't change
     if (listEquals(currentOrder, order)) {
       return;
     }
-    for (var entry in _overlayEntries) {
-      if (entry.mounted) {
-        entry.remove(); // Remove mounted overlay entries
-      }
-    }
+    _removeOverlayEntries();
     // Reinserts overlay entries in a new order for a smooth transition
     try {
       Overlay.of(context).insert(_overlayEntries[order[0]]);
@@ -330,40 +344,22 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     }
   }
 
-  List<int> currentOrder = [];
-
-  void _listenToAnimationChanges(double progress) {
-    if (_controller._animationController.isAnimating || _controller._isAnimating) {
-      if (_controller._animationController.value < 0.25) {
-        _reinsertOverlayEntries([1, 2, 0]);
-        currentOrder = [1, 2, 0];
-      }
-      if (_controller._animationController.value > 0.25 &&
-          _controller._animationController.value < 0.75) {
-        _reinsertOverlayEntries([0, 1, 2]);
-        currentOrder = [0, 1, 2];
-      }
-      // Check if the animation controller value indicates that the animation is past halfway
-      if (_controller._animationController.value > 0.75) {
-        _reinsertOverlayEntries([0, 2, 1]);
-        currentOrder = [0, 2, 1];
+  /// remove mounted overlay entries from view
+  void _removeOverlayEntries() {
+    for (var entry in _overlayEntries) {
+      try {
+        if (entry.mounted) {
+          entry.remove(); // Remove mounted overlay entries
+        } // Remove each overlay entry from the overlay
+      } catch (e, st) {
+        debugPrint(
+          '[StackedTrioCarousel:OverlayEntries] Failed to remove entry: $entry'
+          'Error: $e\n$st',
+        );
       }
     }
   }
 
-  void _onTap(Widget child) {
-    int index = _children.indexOf(child);
-    if (child != _children.last && !_controller._animationController.isAnimating) {
-      if (index == 0) {
-        _controller.previous();
-      }
-      if (index == 1) {
-        _controller.next();
-      }
-      return;
-    }
-    widget.onTap?.call(index);
-  }
 }
 
 class StackedTrioCarouselParams {
@@ -434,20 +430,8 @@ class StackedTrioCarouselParams {
     this.angle = 0,
     this.appearDuration = const Duration(milliseconds: 275),
     this.disappearDuration = const Duration(milliseconds: 50),
-  }) : assert(
-         scaleRatio > 0 && scaleRatio < 1,
-         "Scale ratio should be greater than 0 and smaller than 1",
-       ),
-       assert(
-         minimumOpacity >= 0 && minimumOpacity <= 1,
-         "Minimum opacity value should be between 0 and 1",
-       ),
-       assert(
-         maximumOpacity >= 0 && maximumOpacity <= 1,
-         "Maximum opacity value should be between 0 and 1",
-       ),
-       assert(
-         maximumOpacity > minimumOpacity,
-         "Maximum opacity value should be bigger than minimum opacity value",
-       );
+  }) : assert(scaleRatio > 0 && scaleRatio < 1, "Scale ratio should be greater than 0 and smaller than 1"),
+       assert(minimumOpacity >= 0 && minimumOpacity <= 1, "Minimum opacity value should be between 0 and 1"),
+       assert(maximumOpacity >= 0 && maximumOpacity <= 1, "Maximum opacity value should be between 0 and 1"),
+       assert(maximumOpacity > minimumOpacity, "Maximum opacity value should be bigger than minimum opacity value");
 }
