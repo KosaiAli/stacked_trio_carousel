@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:stacked_trio_carousel/stacked_trio_carousel.dart';
-import 'package:stacked_trio_carousel/stacked_trio_carousel_controller.dart';
 
 final RouteObserver routeObserver = RouteObserver();
 
@@ -45,9 +44,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void initState() {
     _carouselController = StackedTrioCarouselController(
       tickerProvider: this,
-      animationDuration: const Duration(milliseconds: 800),
-      autoPlayInterval: const Duration(seconds: 2),
-      autoPlay: true,
+      swipingDirection: .rtl,
     );
     super.initState();
   }
@@ -62,32 +59,28 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       body: Column(
         children: [
           StackedTrioCarousel(
-            background: Container(
-              height: 400,
-            ),
+            height: 400,
+            width: MediaQuery.of(context).size.width,
+            background: Container(),
             params: StackedTrioCarouselParams(
               cardHeight: 200,
               cardWidth: 200,
-              scaleRatio: 0.8,
+              angle: pi / 2,
             ),
             routeObserver: routeObserver,
             controller: _carouselController,
-            angle: pi / 4,
+            onTap: (index) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SecondScreen()),
+              );
+            },
             children: _color
                 .map(
-                  (color) => GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SecondScreen(),
-                          ));
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
+                  (color) => Container(
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(25),
                     ),
                   ),
                 )
@@ -106,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   : "Start Auto Play",
               style: const TextStyle(color: Colors.black),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -123,9 +116,7 @@ class SecondScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('second screen'),
       ),
-      body: const Center(
-        child: Text('second screen'),
-      ),
+      body: const Center(child: Text('second screen')),
     );
   }
 }
