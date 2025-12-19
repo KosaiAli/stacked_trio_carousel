@@ -141,9 +141,15 @@ class StackedTrioCarouselController {
     final yCenterPoint = (widgetSize.height - params.cardHeight) / 2;
     _centerPoint = Offset(xCenterPoint, yCenterPoint);
 
-    final firstPos = _firstCardPosition(padding: params.padding, angle: params.angle);
+    final firstPos = _firstCardPosition(
+      padding: params.padding,
+      angle: params.angle,
+    );
 
-    final secondPos = _secondCardPosition(padding: params.padding, angle: params.angle);
+    final secondPos = _secondCardPosition(
+      padding: params.padding,
+      angle: params.angle,
+    );
 
     final thirdPos = _centerPoint;
 
@@ -182,7 +188,10 @@ class StackedTrioCarouselController {
 
     scaleAnimations = [
       TweenSequence<double>([
-        TweenSequenceItem(tween: Tween(begin: 1.0, end: params.scaleRatio), weight: 50),
+        TweenSequenceItem(
+          tween: Tween(begin: 1.0, end: params.scaleRatio),
+          weight: 50,
+        ),
         TweenSequenceItem(
           tween: Tween(begin: params.scaleRatio, end: params.scaleRatio),
           weight: 50,
@@ -193,42 +202,69 @@ class StackedTrioCarouselController {
           tween: Tween(begin: params.scaleRatio, end: params.scaleRatio),
           weight: 50,
         ),
-        TweenSequenceItem(tween: Tween(begin: params.scaleRatio, end: 1.0), weight: 50),
+        TweenSequenceItem(
+          tween: Tween(begin: params.scaleRatio, end: 1.0),
+          weight: 50,
+        ),
       ]).animate(_animationController),
       TweenSequence<double>([
-        TweenSequenceItem(tween: Tween(begin: params.scaleRatio, end: 1.0), weight: 50),
-        TweenSequenceItem(tween: Tween(begin: 1.0, end: params.scaleRatio), weight: 50),
+        TweenSequenceItem(
+          tween: Tween(begin: params.scaleRatio, end: 1.0),
+          weight: 50,
+        ),
+        TweenSequenceItem(
+          tween: Tween(begin: 1.0, end: params.scaleRatio),
+          weight: 50,
+        ),
       ]).animate(_animationController),
     ];
 
     opacityAnimations = [
       TweenSequence<double>([
         TweenSequenceItem(
-          tween: Tween(begin: params.maximumOpacity, end: params.minimumOpacity),
+          tween: Tween(
+            begin: params.maximumOpacity,
+            end: params.minimumOpacity,
+          ),
           weight: 50,
         ),
         TweenSequenceItem(
-          tween: Tween(begin: params.minimumOpacity, end: params.minimumOpacity),
-          weight: 50,
-        ),
-      ]).animate(_animationController),
-      TweenSequence<double>([
-        TweenSequenceItem(
-          tween: Tween(begin: params.minimumOpacity, end: params.minimumOpacity),
-          weight: 50,
-        ),
-        TweenSequenceItem(
-          tween: Tween(begin: params.minimumOpacity, end: params.maximumOpacity),
+          tween: Tween(
+            begin: params.minimumOpacity,
+            end: params.minimumOpacity,
+          ),
           weight: 50,
         ),
       ]).animate(_animationController),
       TweenSequence<double>([
         TweenSequenceItem(
-          tween: Tween(begin: params.minimumOpacity, end: params.maximumOpacity),
+          tween: Tween(
+            begin: params.minimumOpacity,
+            end: params.minimumOpacity,
+          ),
           weight: 50,
         ),
         TweenSequenceItem(
-          tween: Tween(begin: params.maximumOpacity, end: params.minimumOpacity),
+          tween: Tween(
+            begin: params.minimumOpacity,
+            end: params.maximumOpacity,
+          ),
+          weight: 50,
+        ),
+      ]).animate(_animationController),
+      TweenSequence<double>([
+        TweenSequenceItem(
+          tween: Tween(
+            begin: params.minimumOpacity,
+            end: params.maximumOpacity,
+          ),
+          weight: 50,
+        ),
+        TweenSequenceItem(
+          tween: Tween(
+            begin: params.maximumOpacity,
+            end: params.minimumOpacity,
+          ),
           weight: 50,
         ),
       ]).animate(_animationController),
@@ -236,30 +272,48 @@ class StackedTrioCarouselController {
   }
 
   /// Helper to calculate the position of the first card
-  Offset _firstCardPosition({required EdgeInsets padding, required double angle}) {
+  Offset _firstCardPosition({
+    required EdgeInsets padding,
+    required double angle,
+  }) {
     final orientedHorizontalPadding = padding.horizontal * math.cos(angle);
     final orientedVerticalPadding = padding.horizontal * math.sin(angle);
 
-    final xCord = _centerPoint.dx * (1 - math.cos(angle)) - orientedHorizontalPadding;
-    final yCord = _centerPoint.dy * (1 - math.sin(angle)) - orientedVerticalPadding;
-    return Offset(xCord, yCord); // Adjust position based on scale ratio and padding
+    final xCord =
+        _centerPoint.dx * (1 - math.cos(angle)) - orientedHorizontalPadding;
+    final yCord =
+        _centerPoint.dy * (1 - math.sin(angle)) - orientedVerticalPadding;
+    return Offset(
+      xCord,
+      yCord,
+    ); // Adjust position based on scale ratio and padding
   }
 
   /// Helper to calculate the position of the second card
-  Offset _secondCardPosition({required EdgeInsets padding, required double angle}) {
+  Offset _secondCardPosition({
+    required EdgeInsets padding,
+    required double angle,
+  }) {
     final orientedHorizontalPadding = padding.horizontal * math.cos(angle);
     final orientedVerticalPadding = padding.horizontal * math.sin(angle);
 
-    final xCord = _centerPoint.dx * (1 + math.cos(angle)) + orientedHorizontalPadding;
-    final yCord = _centerPoint.dy * (1 + math.sin(angle)) + orientedVerticalPadding;
-    return Offset(xCord, yCord); // Adjust position based on scale ratio and padding
+    final xCord =
+        _centerPoint.dx * (1 + math.cos(angle)) + orientedHorizontalPadding;
+    final yCord =
+        _centerPoint.dy * (1 + math.sin(angle)) + orientedVerticalPadding;
+    return Offset(
+      xCord,
+      yCord,
+    ); // Adjust position based on scale ratio and padding
   }
 
   /// Starts the auto-play timer
   void startAutoPlay() {
     _stopTimer(); // Ensure no duplicate timers
     _timer = Timer.periodic(autoPlayInterval, (_) {
-      _swipingDirection == SwipingDirection.rtl ? next() : previous(); // Automatically move to the next card
+      _swipingDirection == SwipingDirection.rtl
+          ? next()
+          : previous(); // Automatically move to the next card
     });
     // resume autoplay behaviour
     _autoPlay = true;
@@ -298,7 +352,10 @@ class StackedTrioCarouselController {
   }
 
   /// Prepares for user interaction by stopping animations and auto-play
-  void onUserInteractionStart(double swipeStartingPointdx, double swipeStartingPointdy) {
+  void onUserInteractionStart(
+    double swipeStartingPointdx,
+    double swipeStartingPointdy,
+  ) {
     _stopTimer();
     stopAnimation();
     _swipeStartingPointdx = swipeStartingPointdx;
@@ -306,14 +363,19 @@ class StackedTrioCarouselController {
   }
 
   /// Updates animation progress based on user drag gestures
-  void onUserInteractionUpdate(DragUpdateDetails details, double cardWidth, StackedTrioCarouselParams params) {
+  void onUserInteractionUpdate(
+    DragUpdateDetails details,
+    double cardWidth,
+    StackedTrioCarouselParams params,
+  ) {
     _swipingMethod = SwipingMethod.userDriven;
 
     // Calculating the Difference between global and local components
     final dx = details.globalPosition.dx - _swipeStartingPointdx!;
     final dy = details.globalPosition.dy - _swipeStartingPointdy!;
 
-    final projectedDelta = dx * math.cos(params.angle) + dy * math.sin(params.angle);
+    final projectedDelta =
+        dx * math.cos(params.angle) + dy * math.sin(params.angle);
 
     final value = (0.5 - projectedDelta / cardWidth).clamp(0.0, 1.0);
 

@@ -42,3 +42,12 @@
 
 - Resolve Dart formatting issues
 - Add vertical padding 
+
+## 1.1.0
+
+- Added the Reveal Back Cards feature for a more user-friendly experience
+- Introduced `SwipingDirection` to support RTL and LTR animations
+- Improved user-driven animation to support both forward and backward motion
+- Improved animation smoothness
+- Reduced rebuilds for better performance
+- Added support for vertical padding

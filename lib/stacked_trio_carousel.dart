@@ -17,7 +17,12 @@ class StackedTrioCarousel extends StatefulWidget {
     this.routeObserver,
     this.controller,
     this.onTap,
-  }) : assert(children.length == 3, "the children list should contain exactly 3 items.");
+    this.height,
+    this.width,
+  }) : assert(
+         children.length == 3,
+         "the children list should contain exactly 3 items.",
+       );
 
   /// The background widget.
   ///
@@ -56,11 +61,23 @@ class StackedTrioCarousel extends StatefulWidget {
   /// Takes the index of the element that the user taps.
   final Function(int index)? onTap;
 
+  /// The height of the whole carousel widget
+  ///
+  /// make sure to specify this value for the widget to behave probably
+  /// espically inside columns and vertical list view
+  final double? height;
+
+  /// The width of the whole carousel widget
+  ///
+  /// make sure to specify this value for the widget to behave probably
+  /// espically inside row and horizontal list view
+  final double? width;
   @override
   State<StackedTrioCarousel> createState() => _StackedTrioCarouselState();
 }
 
-class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerProviderStateMixin, RouteAware {
+class _StackedTrioCarouselState extends State<StackedTrioCarousel>
+    with TickerProviderStateMixin, RouteAware {
   late StackedTrioCarouselController _controller;
 
   // Caching overlay entries to manage their visibility and order
@@ -73,16 +90,24 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
   List<int> currentOrder = [];
 
   // Establishes a coordinate bridge between the background (Target) and the Element (Follower)
-  final LayerLink layerLink = LayerLink();  
-  
+  final LayerLink layerLink = LayerLink();
+
+  // Store the changes in widget size
+  Size _lastSize = Size.zero;
+
+  // Store the gloabl offset of the widget
+  Offset _offset = Offset.zero;
+
   @protected
   void _handleAnimationStart() {
-     /* Might Come in Handy Later */
+    /* Might Come in Handy Later */
   }
 
   @override
   void initState() {
-    _controller = widget.controller ?? StackedTrioCarouselController(tickerProvider: this);
+    _controller =
+        widget.controller ??
+        StackedTrioCarouselController(tickerProvider: this);
 
     _controller.onAnimationStart = _handleAnimationStart;
     _controller.onAnimationEnd = _listenToAnimationEnd;
@@ -92,29 +117,63 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
 
     // ensure the widget has been rendered
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      try {
-        // Retrieving the size and offset of the entire widget for layout calculations
-        RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-        final size = renderBox!.size;
-        Offset widgetOffset = renderBox.localToGlobal(Offset.zero);
-
-        _controller.initializeAnimations(params: widget.params, widgetSize: size, widgetOffset: widgetOffset);
-      } catch (e, st) {
-        debugPrint(
-          '[StackedTrioCarousel:initState] Failed to initialize layout or animations.\n'
-          'Reason: $e\n$st',
-        );
-      }
-
-      _generateStackedCards();
+      RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+      _offset = renderBox!.localToGlobal(Offset.zero);
     });
 
     super.initState();
   }
 
+  void initializeAnimation(Size size) {
+    if (_lastSize == size) return;
+    try {
+      for (var entry in _overlayEntries) {
+        if (entry.mounted) {
+          entry.remove(); // Remove mounted overlay entries
+        }
+      }
+      _controller.initializeAnimations(
+        params: widget.params,
+        widgetSize: size,
+        widgetOffset: _offset,
+      );
+    } catch (e, st) {
+      debugPrint(
+        '[StackedTrioCarousel:initState] Failed to initialize layout or animations.\n'
+        'Reason: $e\n$st',
+      );
+    }
+    _generateStackedCards();
+    _lastSize = size;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CompositedTransformTarget(link: layerLink, child: widget.background);
+    return CompositedTransformTarget(
+      link: layerLink,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width =
+              widget.width ??
+              (constraints.maxWidth == double.infinity
+                  ? 400
+                  : constraints.maxWidth);
+
+          final height =
+              widget.height ??
+              (constraints.maxHeight == double.infinity
+                  ? 400
+                  : constraints.maxHeight);
+          final size = Size(width, height);
+          initializeAnimation(size);
+          return SizedBox(
+            height: size.height,
+            width: size.width,
+            child: widget.background,
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -156,7 +215,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
   @override
   void didPopNext() {
     if (_controller._autoPlay) {
-      _controller.swipingDirection == SwipingDirection.rtl ? _controller.next() : _controller.previous();
+      _controller.swipingDirection == SwipingDirection.rtl
+          ? _controller.next()
+          : _controller.previous();
       _controller.startAutoPlay();
       return;
     }
@@ -166,11 +227,14 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
   void didPushNext() {
     // Handle the event when this widget is pushed off the screen
     Future.delayed(
-      widget.params.disappearDuration, // Wait for the specified duration before disappearing
+      widget
+          .params
+          .disappearDuration, // Wait for the specified duration before disappearing
       () {},
     );
 
-    super.didPushNext(); // Call the superclass method to ensure proper functionality
+    super
+        .didPushNext(); // Call the superclass method to ensure proper functionality
   }
 
   /// Rearranging the cards.
@@ -203,7 +267,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
         ),
       );
       try {
-        Overlay.of(context).insert(_overlayEntries[i]); // Insert the overlay into the overlay stack
+        Overlay.of(context).insert(
+          _overlayEntries[i],
+        ); // Insert the overlay into the overlay stack
       } catch (e, st) {
         debugPrint(
           '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[i]}'
@@ -241,7 +307,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
                       onTap: () => _onTap(child),
                       onPanDown: _onPanDown, // Handle touch down event
                       onPanUpdate: _onPanUpdate, // Handle touch movement
-                      onPanCancel: _onPanCancel, // Handle cancellation of the gesture
+                      onPanCancel:
+                          _onPanCancel, // Handle cancellation of the gesture
                       onPanEnd: _onPanEnd, // Handle end of the gesture
                       child: child,
                     ),
@@ -267,17 +334,25 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
 
   /// Handles the update of a swipe gesture
   void _onPanUpdate(DragUpdateDetails details) {
-    _controller.onUserInteractionUpdate(details, widget.params.cardWidth, widget.params);
+    _controller.onUserInteractionUpdate(
+      details,
+      widget.params.cardWidth,
+      widget.params,
+    );
   }
 
   /// Handles the start of a swipe gesture
   void _onPanDown(DragDownDetails dragDownDetails) {
-    _controller.onUserInteractionStart(dragDownDetails.globalPosition.dx, dragDownDetails.globalPosition.dy);
+    _controller.onUserInteractionStart(
+      dragDownDetails.globalPosition.dx,
+      dragDownDetails.globalPosition.dy,
+    );
   }
 
   /// Monitor Animation Changes
   void _listenToAnimationChanges(double progress) {
-    if (_controller._animationController.isAnimating || _controller._isAnimating) {
+    if (_controller._animationController.isAnimating ||
+        _controller._isAnimating) {
       // Check if the animation is past halfway both ways and in between
       if (_controller._animationController.value < 0.25) {
         _reinsertOverlayEntries([1, 2, 0]);
@@ -287,17 +362,19 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
         _reinsertOverlayEntries([0, 2, 1]);
         currentOrder = [0, 2, 1];
       }
-      if (0.25 < _controller._animationController.value && _controller._animationController.value < 0.75) {
+      if (0.25 < _controller._animationController.value &&
+          _controller._animationController.value < 0.75) {
         _reinsertOverlayEntries([0, 1, 2]);
         currentOrder = [0, 1, 2];
       }
     }
   }
 
-  /// Bring non-main element to center if pressed, and run defined onTap logic on main element  
+  /// Bring non-main element to center if pressed, and run defined onTap logic on main element
   void _onTap(Widget child) {
     int index = _children.indexOf(child);
-    if (child != _children.last && !_controller._animationController.isAnimating) {
+    if (child != _children.last &&
+        !_controller._animationController.isAnimating) {
       if (index == 0) {
         _controller.previous();
       }
@@ -311,7 +388,6 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
 
   /// Update Overlay Entries by reinserting them
   void _reinsertOverlayEntries(List<int> order) {
-    
     // Return if order didn't change
     if (listEquals(currentOrder, order)) {
       return;
@@ -359,7 +435,6 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
       }
     }
   }
-
 }
 
 class StackedTrioCarouselParams {
@@ -430,8 +505,20 @@ class StackedTrioCarouselParams {
     this.angle = 0,
     this.appearDuration = const Duration(milliseconds: 275),
     this.disappearDuration = const Duration(milliseconds: 50),
-  }) : assert(scaleRatio > 0 && scaleRatio < 1, "Scale ratio should be greater than 0 and smaller than 1"),
-       assert(minimumOpacity >= 0 && minimumOpacity <= 1, "Minimum opacity value should be between 0 and 1"),
-       assert(maximumOpacity >= 0 && maximumOpacity <= 1, "Maximum opacity value should be between 0 and 1"),
-       assert(maximumOpacity > minimumOpacity, "Maximum opacity value should be bigger than minimum opacity value");
+  }) : assert(
+         scaleRatio > 0 && scaleRatio < 1,
+         "Scale ratio should be greater than 0 and smaller than 1",
+       ),
+       assert(
+         minimumOpacity >= 0 && minimumOpacity <= 1,
+         "Minimum opacity value should be between 0 and 1",
+       ),
+       assert(
+         maximumOpacity >= 0 && maximumOpacity <= 1,
+         "Maximum opacity value should be between 0 and 1",
+       ),
+       assert(
+         maximumOpacity > minimumOpacity,
+         "Maximum opacity value should be bigger than minimum opacity value",
+       );
 }

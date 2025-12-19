@@ -10,58 +10,85 @@ The carousel features one prominent card in the foreground and two cards in the 
 <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif" width="300"/>
 </div>
 
+## 🆕 What's New
+
+### ✨ New
+- Added the Reveal Back Cards feature for a more user-friendly experience
+- Introduced `SwipingDirection` to support RTL and LTR animations
+
+### 🛠 Improvements
+- Improved user-driven animation to support both forward and backward motion
+- Improved animation smoothness
+- Reduced rebuilds for better performance
+- Added support for vertical padding
+
+
 ## Getting Started
 
 To use this package, add `stacked_trio_carousel` as a dependency in your `pubspec.yaml` file. For example:
 
 ```yaml
 dependencies:
-  stacked_trio_carousel: ^1.0.1
+  stacked_trio_carousel: ^1.1.0
 ```
 
 ## Usage
 
-Specify the background, and set the width and height of the card. Then, provide the children.
+Specify the background, and set the width and height of the cards.
+
+Make sure to specify the height and width of the carousel so it behaves properly when used inside a `Column`, `Row`, or `ListView`.
 
 ```dart
 final List _color = [Colors.red, Colors.green, Colors.blue];
 @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      title: Text(widget.title),
-    ),
-    body: Center(
-      child: StackedTrioCarousel(
-        background: Container(),
-        params: StackedTrioCarouselParams(
-          cardHeight: 200,
-          cardWidth: 200,
-        ),
-        children: _color
-            .map(
-              (color) => GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SecondScreen(),
-                      ));
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-              ),
-            )
-            .toList(),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
       ),
-    ),
-  );
-}
+      body: Column(
+        children: [
+          StackedTrioCarousel(
+            height: 400,
+            width: MediaQuery.of(context).size.width,
+            background: Container(),
+            params: StackedTrioCarouselParams(cardHeight: 200, cardWidth: 200),
+            routeObserver: routeObserver,
+            controller: _carouselController,
+            onTap: (index) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SecondScreen()),
+              );
+            },
+            children: _color
+                .map(
+                  (color) => Container(
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _carouselController.autoPlay
+                  ? _carouselController.stopAutoPlay()
+                  : _carouselController.startAutoPlay();
+              setState(() {});
+            },
+            child: Text(
+              _carouselController.autoPlay ? "Stop Auto Play" : "Start Auto Play",
+              style: const TextStyle(color: Colors.black),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 ```
 
 ### Change the Width and Height
@@ -76,13 +103,13 @@ StackedTrioCarouselParams(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size_1.gif" width="300"/>
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size_2.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size.gif" width="300"/>
 </div>
 
 ### Add Padding
 
-To apply padding to the background cards (horizontal padding only), use the `padding` property.
+To apply padding to the background cards, use the `padding` property.
 
 ```dart
 StackedTrioCarouselParams(
@@ -93,7 +120,7 @@ StackedTrioCarouselParams(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size_2.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/change_size.gif" width="300"/>
   <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/padding.gif" width="300"/>
 </div>
 
@@ -112,11 +139,11 @@ StackedTrioCarouselParams(
 ```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/scale_and_opacity_1.gif" width="300"/>
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/scale_and_opacity_2.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/padding.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/scale_and_opacity.gif" width="300"/>
 </div>
 
-### Add controller 
+### Add a Controller
 
 ```dart
 late StackedTrioCarouselController _carouselController;
@@ -149,12 +176,42 @@ _carouselController = StackedTrioCarouselController(
   <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/animation_duration.gif" width="300"/>
 </div>
 
-### Manual Swiping
 
-You can also allow manual swiping:
+### Change Animation Direction 
+You can use the `swipingDirection` parameter in the `StackedTrioCarouselController` constructor to change the animation direction.
+
+- `SwipingDirection.rtl` for right-to-left
+- `SwipingDirection.ltr` for left-to-right
+
+```dart
+_carouselController = StackedTrioCarouselController(
+    tickerProvider: this,
+    animationDuration: const Duration(milliseconds: 200),
+    autoPlayInterval: const Duration(seconds: 1),
+    swipingDirection: .rtl,
+);
+```
 
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/no_animation.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/ltr.gif" width="300"/>
+</div>
+
+### Manual Swiping
+
+Manual swiping is supported:
+
+<div style="display: flex; justify-content: space-around;">
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/user_driven.gif" width="300"/>
+</div>
+
+
+### Reveal Back Layer Cards 
+You can interact with the back layer cards by tapping on them to bring them to the front.
+
+#### *Note: The `onTap` parameter is only triggered when tapping the front card.*
+<div style="display: flex; justify-content: space-around;">
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/press_back_cards.gif" width="300"/>
 </div>
 
 ### Stop Automatic Animation
@@ -183,95 +240,29 @@ ElevatedButton(
         style: const TextStyle(color: Colors.black),
     ),
 )
-```
-
-### Navigation Support with `RouteObserver`
-
-If your app includes navigation functionality, you need to provide a `RouteObserver` to ensure the carousel behaves correctly when navigating between screens. Without this, the carousel might still be visible after navigation.
-
-#### Steps to Add `RouteObserver`:
-
-1. **Define the `RouteObserver` as a top-level variable and assign it to your `MaterialApp`:**
-
-```dart
-final RouteObserver routeObserver = RouteObserver();
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorObservers: [routeObserver],
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Stacked Trio Carousel'),
-    );
-  }
-}
-```
-
-2. **Pass the `RouteObserver` to the `StackedTrioCarousel` widget:**
-
-```dart
-routeObserver: routeObserver,
-```
-
-3. **Perform a hot restart of the application.**
-
-<div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/navigation_1.gif" width="300"/>
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/navigation_2.gif" width="300"/>
-</div>
+```  
 
 
-### Dynamic Angle 
+### Dynamic Angle
 
-You should specify a background with a sprcific height and angle for this feature to work
 ``` dart
-StackedTrioCarousel(
-  background: Container(
-    height: 400,
-  ),
-  params: StackedTrioCarouselParams(
+StackedTrioCarouselParams(
     cardHeight: 200,
     cardWidth: 200,
-    scaleRatio: 0.8,
-    padding: const EdgeInsets.symmetric(horizontal: 0),
+    angle: pi / 4,
   ),
-  routeObserver: routeObserver,
-  controller: _carouselController,
-  angle: pi / 2,
-  children: _color
-      .map(
-        (color) => GestureDetector(
-          onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SecondScreen(),
-                ));
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(25),
-            ),
-          ),
-        ),
-      ).toList(),
-    ),
+```
+``` dart
+StackedTrioCarouselParams(
+    cardHeight: 200,
+    cardWidth: 200,
+    angle: pi / 2,
+  ),
 ```
 <div style="display: flex; justify-content: space-around;">
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/90 degree.gif" width="300"/>
-  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/45 degree.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/ltr.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/45_degree.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/90_degree.gif" width="300"/>
 </div>
 
 
