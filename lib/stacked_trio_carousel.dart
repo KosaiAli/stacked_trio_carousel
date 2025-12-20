@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 part 'stacked_trio_carousel_controller.dart';
 
 class StackedTrioCarousel extends StatefulWidget {
-  const StackedTrioCarousel({
+  StackedTrioCarousel({
     super.key,
     required this.background,
     required this.children,
@@ -22,6 +22,11 @@ class StackedTrioCarousel extends StatefulWidget {
   }) : assert(
          children.length == 3,
          "the children list should contain exactly 3 items.",
+       ),
+       assert(
+         children.every((c) => c.key != null && c.key is ValueKey) &&
+             children.map((c) => c.key).toSet().length == children.length,
+         'Each child must have a non-null unique value key',
        );
 
   /// The background widget.
@@ -125,26 +130,27 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   }
 
   void initializeAnimation(Size size) {
-    if (_lastSize == size) return;
-    try {
-      for (var entry in _overlayEntries) {
-        if (entry.mounted) {
-          entry.remove(); // Remove mounted overlay entries
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        for (var entry in _overlayEntries) {
+          if (entry.mounted) {
+            entry.remove(); // Remove mounted overlay entries
+          }
         }
+        _controller.initializeAnimations(
+          params: widget.params,
+          widgetSize: size,
+          widgetOffset: _offset,
+        );
+      } catch (e, st) {
+        debugPrint(
+          '[StackedTrioCarousel:initState] Failed to initialize layout or animations.\n'
+          'Reason: $e\n$st',
+        );
       }
-      _controller.initializeAnimations(
-        params: widget.params,
-        widgetSize: size,
-        widgetOffset: _offset,
-      );
-    } catch (e, st) {
-      debugPrint(
-        '[StackedTrioCarousel:initState] Failed to initialize layout or animations.\n'
-        'Reason: $e\n$st',
-      );
-    }
-    _generateStackedCards();
-    _lastSize = size;
+      _generateStackedCards();
+      _lastSize = size;
+    });
   }
 
   @override
@@ -156,16 +162,18 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
           final width =
               widget.width ??
               (constraints.maxWidth == double.infinity
-                  ? 400
+                  ? widget.params.cardWidth
                   : constraints.maxWidth);
 
           final height =
               widget.height ??
               (constraints.maxHeight == double.infinity
-                  ? 400
+                  ? widget.params.cardHeight
                   : constraints.maxHeight);
           final size = Size(width, height);
-          initializeAnimation(size);
+          if (_lastSize != size) {
+            initializeAnimation(size);
+          }
           return SizedBox(
             height: size.height,
             width: size.width,
@@ -193,6 +201,30 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     }
   }
 
+  bool _sameChildren(List<Widget> a, List<Widget> b) {
+    if (a.length != b.length) return false;
+
+    for (int i = 0; i < a.length; i++) {
+      if (a[i].key != b[i].key) return false;
+    }
+    return true;
+  }
+
+  @override
+  void didUpdateWidget(covariant StackedTrioCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_sameChildren(oldWidget.children, widget.children)) {
+      _children = List.from(widget.children);
+    }
+    bool shouldReinitialize =
+        (oldWidget.height == widget.height &&
+            oldWidget.width == widget.width) &&
+        (!_sameChildren(oldWidget.children, widget.children) ||
+            (oldWidget.params != widget.params));
+
+    if (shouldReinitialize) initializeAnimation(_lastSize);
+  }
+
   @override
   void dispose() {
     // Unsubscribe from the route observer if it is provided to avoid memory leaks
@@ -208,7 +240,6 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     }
 
     _removeOverlayEntries();
-    _controller.dispose();
     super.dispose();
   }
 
@@ -305,11 +336,15 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
                     color: Colors.transparent,
                     child: GestureDetector(
                       onTap: () => _onTap(child),
-                      onPanDown: _onPanDown, // Handle touch down event
-                      onPanUpdate: _onPanUpdate, // Handle touch movement
-                      onPanCancel:
-                          _onPanCancel, // Handle cancellation of the gesture
-                      onPanEnd: _onPanEnd, // Handle end of the gesture
+                      onPanDown: (details) =>
+                          _onPanDown(details, child), // Handle touch down event
+                      onPanUpdate: (details) =>
+                          _onPanUpdate(details, child), // Handle touch movement
+                      onPanCancel: () => _onPanCancel(
+                        child,
+                      ), // Handle cancellation of the gesture
+                      onPanEnd: (details) =>
+                          _onPanEnd(details), // Handle end of the gesture
                       child: child,
                     ),
                   ),
@@ -322,18 +357,42 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     );
   }
 
+  /// Bring non-main element to center if pressed, and run defined onTap logic on main element
+  Future<void> _onTap(Widget child) async {
+    int index = _children.indexOf(child);
+    if (child != _children.last &&
+        !_controller._animationController.isAnimating) {
+      if (index == 0) {
+        await _controller.previous();
+      }
+      if (index == 1) {
+        await _controller.next();
+      }
+      if (_controller._autoPlay) {
+        _controller.startAutoPlay();
+      }
+      return;
+    }
+    if (_controller._animationController.value == 0.5) {
+      widget.onTap?.call(index);
+    }
+  }
+
   /// Handles the end of a swipe gesture
   void _onPanEnd(DragEndDetails details) {
     _controller.onUserInteractionEnd();
   }
 
   /// Handles the cancellation of a swipe gesture
-  void _onPanCancel() {
+  void _onPanCancel(Widget child) {
+    if (child != _children.last) return;
     _controller.onUserInteractionCancel();
   }
 
   /// Handles the update of a swipe gesture
-  void _onPanUpdate(DragUpdateDetails details) {
+  void _onPanUpdate(DragUpdateDetails details, Widget child) {
+    if (child != _children.last) return;
+
     _controller.onUserInteractionUpdate(
       details,
       widget.params.cardWidth,
@@ -342,7 +401,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   }
 
   /// Handles the start of a swipe gesture
-  void _onPanDown(DragDownDetails dragDownDetails) {
+  void _onPanDown(DragDownDetails dragDownDetails, Widget child) {
+    if (child != _children.last) return;
     _controller.onUserInteractionStart(
       dragDownDetails.globalPosition.dx,
       dragDownDetails.globalPosition.dy,
@@ -370,54 +430,40 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     }
   }
 
-  /// Bring non-main element to center if pressed, and run defined onTap logic on main element
-  void _onTap(Widget child) {
-    int index = _children.indexOf(child);
-    if (child != _children.last &&
-        !_controller._animationController.isAnimating) {
-      if (index == 0) {
-        _controller.previous();
-      }
-      if (index == 1) {
-        _controller.next();
-      }
-      return;
-    }
-    widget.onTap?.call(index);
-  }
-
   /// Update Overlay Entries by reinserting them
   void _reinsertOverlayEntries(List<int> order) {
     // Return if order didn't change
     if (listEquals(currentOrder, order)) {
       return;
     }
-    _removeOverlayEntries();
-    // Reinserts overlay entries in a new order for a smooth transition
-    try {
-      Overlay.of(context).insert(_overlayEntries[order[0]]);
-    } catch (e, st) {
-      debugPrint(
-        '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[0]]}'
-        'Error: $e\n$st',
-      );
-    }
-    try {
-      Overlay.of(context).insert(_overlayEntries[order[1]]);
-    } catch (e, st) {
-      debugPrint(
-        '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[1]]}'
-        'Error: $e\n$st',
-      );
-    }
-    try {
-      Overlay.of(context).insert(_overlayEntries[order[2]]);
-    } catch (e, st) {
-      debugPrint(
-        '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[2]]}'
-        'Error: $e\n$st',
-      );
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _removeOverlayEntries();
+      // Reinserts overlay entries in a new order for a smooth transition
+      try {
+        Overlay.of(context).insert(_overlayEntries[order[0]]);
+      } catch (e, st) {
+        debugPrint(
+          '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[0]]}'
+          'Error: $e\n$st',
+        );
+      }
+      try {
+        Overlay.of(context).insert(_overlayEntries[order[1]]);
+      } catch (e, st) {
+        debugPrint(
+          '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[1]]}'
+          'Error: $e\n$st',
+        );
+      }
+      try {
+        Overlay.of(context).insert(_overlayEntries[order[2]]);
+      } catch (e, st) {
+        debugPrint(
+          '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[order[2]]}'
+          'Error: $e\n$st',
+        );
+      }
+    });
   }
 
   /// remove mounted overlay entries from view
@@ -521,4 +567,35 @@ class StackedTrioCarouselParams {
          maximumOpacity > minimumOpacity,
          "Maximum opacity value should be bigger than minimum opacity value",
        );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is StackedTrioCarouselParams &&
+        other.cardHeight == cardHeight &&
+        other.cardWidth == cardWidth &&
+        other.scaleRatio == scaleRatio &&
+        other.minimumOpacity == minimumOpacity &&
+        other.maximumOpacity == maximumOpacity &&
+        other.padding == padding &&
+        other.disappearDuration == disappearDuration &&
+        other.appearDuration == appearDuration &&
+        other.angle == angle;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      cardHeight,
+      cardWidth,
+      scaleRatio,
+      minimumOpacity,
+      maximumOpacity,
+      padding,
+      disappearDuration,
+      appearDuration,
+      angle,
+    );
+  }
 }

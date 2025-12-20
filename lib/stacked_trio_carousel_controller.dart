@@ -333,16 +333,16 @@ class StackedTrioCarouselController {
   }
 
   /// Animates to the next card in the carousel
-  void next() {
+  Future next() async {
     if (!_animationController.isAnimating) {
-      _animationController.animateTo(1);
+      return _animationController.animateTo(1);
     }
   }
 
   /// Animates to the previous card in the carousel
-  void previous() {
+  Future previous() async {
     if (!_animationController.isAnimating) {
-      _animationController.animateTo(0);
+      return _animationController.animateTo(0);
     }
   }
 
