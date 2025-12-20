@@ -62,7 +62,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             height: 400,
             width: MediaQuery.of(context).size.width,
             background: Container(),
-            params: StackedTrioCarouselParams(cardHeight: 200, cardWidth: 200, angle: pi),
+            params: StackedTrioCarouselParams(
+              cardHeight: 200,
+              cardWidth: 200,
+              angle: pi,
+            ),
             routeObserver: routeObserver,
             controller: _carouselController,
             onTap: (index) {
@@ -91,7 +95,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               setState(() {});
             },
             child: Text(
-              _carouselController.autoPlay ? "Stop Auto Play" : "Start Auto Play",
+              _carouselController.autoPlay
+                  ? "Stop Auto Play"
+                  : "Start Auto Play",
               style: const TextStyle(color: Colors.black),
             ),
           ),

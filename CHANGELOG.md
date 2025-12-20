@@ -51,3 +51,12 @@
 - Improved animation smoothness
 - Reduced rebuilds for better performance
 - Added support for vertical padding
+
+## 1.1.1
+
+- Fixed “failed to insert entry” error by deferring layout logic using a post-frame callback
+- Prevented swiping gestures on back-layer cards
+- Disabled `onTap` execution unless the animation value is at `0.5`
+- Restored auto-play (timer-based) animation after tapping a back-layer card
+- Corrected initial size calculation to properly use the card’s width and height
+- Ensured parameter changes take effect correctly during hot reload
