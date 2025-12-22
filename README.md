@@ -166,8 +166,8 @@ You can modify the animation speed and the delay between animations.
 ```dart
 _carouselController = StackedTrioCarouselController(
     tickerProvider: this,
-    animationspeed: const speed(milliseconds: 200),
-    autoPlayInterval: const speed(seconds: 1),
+    animationDuration: const Duration(milliseconds: 200),
+    autoPlayInterval: const Duration(seconds: 1),
 );
 ```
 
@@ -186,8 +186,8 @@ You can use the `swipingDirection` parameter in the `StackedTrioCarouselControll
 ```dart
 _carouselController = StackedTrioCarouselController(
     tickerProvider: this,
-    animationspeed: const speed(milliseconds: 200),
-    autoPlayInterval: const speed(seconds: 1),
+    animationDuration: const Duration(milliseconds: 200),
+    autoPlayInterval: const Duration(seconds: 1),
     swipingDirection: .rtl,
 );
 ```
@@ -221,8 +221,8 @@ To stop the automatic animation, set `autoPlay` to `false`.
 ```dart
 _carouselController = StackedTrioCarouselController(
     tickerProvider: this,
-    animationspeed: const speed(milliseconds: 200),
-    autoPlayInterval: const speed(seconds: 1),
+    animationDuration: const Duration(milliseconds: 200),
+    autoPlayInterval: const Duration(seconds: 1),
     autoPlay: false
 );
 ```
