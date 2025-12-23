@@ -118,7 +118,7 @@ class StackedTrioCarouselController {
   /// ### User interaction
   /// - [swipeSensitivity]: How sensitive swipe gestures are.
   /// - [swapConfirmationDistance]: Percentage of distance from the center required to confirm a swap.
-  /// 
+  ///
   StackedTrioCarouselController({
     required TickerProvider tickerProvider,
     this.animationDuration = const Duration(seconds: 1),
