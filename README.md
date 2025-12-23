@@ -3,9 +3,7 @@
 A Flutter package that provides a visually engaging widget carousel with a stacked layout of three layered widgets.
 
 ## **Contributors**
-
-[![GitHub Profile](https://img.shields.io/badge/GitHub-GhassanJar3850-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/GhassanJar3850) 
-
+[![GitHub Profile](https://img.shields.io/badge/GitHub-Ghassan_Jarbouh-FF5D5D?style=for-the-badge&logo=github&logoColor=white)](https://github.com/GhassanJar3850)
 ## Features
 
 The carousel features one prominent widget in the foreground and two widgets in the background, making it perfect for showcasing content in a layered and dynamic way. With built-in animations and customizable properties, users can swipe through the widgets or enable automatic transitions for a smooth and interactive experience.
