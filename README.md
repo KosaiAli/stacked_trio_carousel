@@ -1,4 +1,4 @@
-# Stacked Trio Carousel 󰕬
+# Stacked Trio Carousel
 
 A Flutter package that provides a visually engaging widget carousel with a stacked layout of three layered widgets.
 
