@@ -1,6 +1,10 @@
-# Stacked Trio Carousel
+# Stacked Trio Carousel 󰕬
 
-**Stacked Trio Carousel** is a Flutter package that provides a visually engaging widget carousel with a stacked layout of three layered widgets.
+A Flutter package that provides a visually engaging widget carousel with a stacked layout of three layered widgets.
+
+## **Contributors**
+
+[![GitHub Profile](https://img.shields.io/badge/GitHub-GhassanJar3850-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/GhassanJar3850) 
 
 ## Features
 
@@ -10,19 +14,20 @@ The carousel features one prominent widget in the foreground and two widgets in 
 <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/default.gif" width="300"/>
 </div>
 
-## 🆕 What's New
 
-### ✨ New
+## 🛠 What's New
 
-- Added the Reveal Back Widgets feature for a more user-friendly experience
-- Introduced `SwipingDirection` to support RTL and LTR animations
+- Custom Animation Curves.
 
-### 🛠 Improvements
+- Adapt the autoplay direction to the user swipe direction option.
 
-- Improved user-driven animation to support both forward and backward motion
-- Improved animation smoothness
-- Reduced rebuilds for better performance
-- Added support for vertical padding
+- Swiping Sensitivity and Swap Confirmation Distance.
+
+- Bring-to-front feature for a more user-friendly experience.
+
+- Introduced `SwipingDirection` to support RTL and LTR animations.
+
+- Fixed Major Bugs.
 
 ## Getting Started
 
@@ -113,6 +118,9 @@ StackedTrioCarouselParams(
 
 To apply padding to the background widgets, use the `firstWidgetPadding` and `secondWidgetPadding` properties.
 Each property controls the padding of its corresponding background widget independently.
+
+> **Note:** <br>Don't use `EdgeInsets.symmetric` because the values will cancel out.
+Use `EdgeInsets.only` to move the side widgets to the desired location.<br>
 
 #### Padding from outside
 
@@ -216,7 +224,10 @@ void initState() {
 ```
 
 ```dart
-controller: _carouselController,
+StackedTrioCarousel(
+  controller: _carouselController,
+  ...
+);
 ```
 
 #### Add Curves
@@ -240,7 +251,7 @@ _carouselController = StackedTrioCarouselController(
 
 #### Change Swap Confirmation Distance
 
-The `swapConfirmationDistance` defines the minimum swipe progress required to confirm a card swap.
+The `swapConfirmationDistance` defines the minimum percentage of distance from the center required to confirm a swap.
 
 ```dart
 _carouselController = StackedTrioCarouselController(
@@ -262,7 +273,7 @@ You can modify the animation speed and the delay between animations.
 ```dart
 _carouselController = StackedTrioCarouselController(
     tickerProvider: this,
-    animationDuration: const Duration(milliseconds: 1000),
+    animationDuration: const Duration(seconds: 1),
     autoPlayInterval: const Duration(seconds: 1),
 );
 ```
@@ -279,13 +290,13 @@ To stop the automatic animation, set `autoPlay` to `false`.
 ```dart
 _carouselController = StackedTrioCarouselController(
     tickerProvider: this,
-    animationDuration: const Duration(milliseconds: 1000),
+    animationDuration: const Duration(seconds: 1),
     autoPlayInterval: const Duration(seconds: 1),
     autoPlay: false
 );
 ```
 
-You can also use the `startAutoPlay` and `stopAutoPlay` functions
+You can also use the `startAutoPlay` and `stopAutoPlay` functions.
 
 ```dart
 ElevatedButton(
@@ -333,18 +344,14 @@ Manual swiping is supported:
 
 You can interact with the back layer widgets by tapping on them to bring them to the front.
 
-> **Note:** The `onTap` parameter is only triggered when tapping the front widget.
+> **Note:** The `onTap` callback is only triggered when tapping the front widget.
 
 <div style="display: flex; justify-content: space-around;">
   <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/press_back_card.gif" width="300"/>
 </div>
 
-## **Contributors**
-
-[![GitHub Profile](https://img.shields.io/badge/GitHub-GhassanJar3850-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/GhassanJar3850)
-
 ## **Examples**
 
-- For a full example, check out the [example page](https://pub.dev/packages/stacked_trio_carousel/example).
+- For a full example, check out the [Example page](https://pub.dev/packages/stacked_trio_carousel/example).
 
-- For more advanced and visually rich animation examples, check out the [Gift Cards Example](https://github.com/KosaiAli/stacked_trio_carousel/tree/main/example/lib/gift_cards_example.dart) and the [Yu Gi Oh Cards Example](https://github.com/KosaiAli/stacked_trio_carousel/tree/main/example/lib/yu_gi_oh_cards_example.dart) on [Github](https://github.com/KosaiAli/stacked_trio_carousel)
+- For more advanced and visually rich animation examples, check out the [Gift Cards Example](https://github.com/KosaiAli/stacked_trio_carousel/tree/main/example/lib/gift_cards_example.dart) and the [Yu-Gi-Oh Cards Example](https://github.com/KosaiAli/stacked_trio_carousel/tree/main/example/lib/yu_gi_oh_cards_example.dart) on [Github](https://github.com/KosaiAli/stacked_trio_carousel)

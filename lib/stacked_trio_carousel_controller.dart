@@ -17,7 +17,6 @@ enum SwipingDirection {
   ltr,
 }
 
-/// Controller class for managing the StackedTrioCarousel
 class StackedTrioCarouselController {
   /// AnimationController for managing card animations
   late AnimationController _animationController;
@@ -118,9 +117,8 @@ class StackedTrioCarouselController {
   ///
   /// ### User interaction
   /// - [swipeSensitivity]: How sensitive swipe gestures are.
-  /// - [swapConfirmationDistance]:
-  ///   Percentage of distance from the center required to confirm a swap.
-
+  /// - [swapConfirmationDistance]: Percentage of distance from the center required to confirm a swap.
+  /// 
   StackedTrioCarouselController({
     required TickerProvider tickerProvider,
     this.animationDuration = const Duration(seconds: 1),

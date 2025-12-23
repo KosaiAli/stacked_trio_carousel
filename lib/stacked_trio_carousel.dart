@@ -19,10 +19,7 @@ class StackedTrioCarousel extends StatefulWidget {
     this.onTap,
     this.height,
     this.width,
-  }) : assert(
-         children.length == 3,
-         "the children list should contain exactly 3 items.",
-       ),
+  }) : assert(children.length == 3, "the children list should contain exactly 3 items."),
        assert(
          children.every((c) => c.key != null && c.key is ValueKey) &&
              children.map((c) => c.key).toSet().length == children.length,
@@ -80,8 +77,7 @@ class StackedTrioCarousel extends StatefulWidget {
   State<StackedTrioCarousel> createState() => _StackedTrioCarouselState();
 }
 
-class _StackedTrioCarouselState extends State<StackedTrioCarousel>
-    with TickerProviderStateMixin, RouteAware {
+class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerProviderStateMixin, RouteAware {
   late StackedTrioCarouselController _controller;
 
   // Caching overlay entries to manage their visibility and order
@@ -112,9 +108,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
 
   @override
   void initState() {
-    _controller =
-        widget.controller ??
-        StackedTrioCarouselController(tickerProvider: this);
+    _controller = widget.controller ?? StackedTrioCarouselController(tickerProvider: this);
 
     _controller.onAnimationStart = _handleAnimationStart;
     _controller.onAnimationEnd = _listenToAnimationEnd;
@@ -140,11 +134,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
             entry.remove(); // Remove mounted overlay entries
           }
         }
-        _controller.initializeAnimations(
-          params: widget.params,
-          widgetSize: size,
-          widgetOffset: _offset,
-        );
+        _controller.initializeAnimations(params: widget.params, widgetSize: size, widgetOffset: _offset);
       } catch (e, st) {
         debugPrint(
           '[StackedTrioCarousel:initState] Failed to initialize layout or animations.\n'
@@ -164,15 +154,11 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
         builder: (context, constraints) {
           final width =
               widget.width ??
-              (constraints.maxWidth == double.infinity
-                  ? widget.params.widgetWidth
-                  : constraints.maxWidth);
+              (constraints.maxWidth == double.infinity ? widget.params.widgetWidth : constraints.maxWidth);
 
           final height =
               widget.height ??
-              (constraints.maxHeight == double.infinity
-                  ? widget.params.widgetHeight
-                  : constraints.maxHeight);
+              (constraints.maxHeight == double.infinity ? widget.params.widgetHeight : constraints.maxHeight);
 
           final size = Size(width, height);
 
@@ -180,11 +166,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
             initializeAnimation(size);
           }
 
-          return SizedBox(
-            height: size.height,
-            width: size.width,
-            child: widget.background,
-          );
+          return SizedBox(height: size.height, width: size.width, child: widget.background);
         },
       ),
     );
@@ -223,10 +205,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
       _children = List.from(widget.children);
     }
     bool shouldReinitialize =
-        (oldWidget.height == widget.height &&
-            oldWidget.width == widget.width) &&
-        (!_sameChildren(oldWidget.children, widget.children) ||
-            (oldWidget.params != widget.params));
+        (oldWidget.height == widget.height && oldWidget.width == widget.width) &&
+        (!_sameChildren(oldWidget.children, widget.children) || (oldWidget.params != widget.params));
 
     if (shouldReinitialize) initializeAnimation(_lastSize);
   }
@@ -264,14 +244,11 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   void didPushNext() {
     // Handle the event when this widget is pushed off the screen
     Future.delayed(
-      widget
-          .params
-          .disappearDuration, // Wait for the specified duration before disappearing
+      widget.params.disappearDuration, // Wait for the specified duration before disappearing
       () {},
     );
 
-    super
-        .didPushNext(); // Call the superclass method to ensure proper functionality
+    super.didPushNext(); // Call the superclass method to ensure proper functionality
   }
 
   /// Rearranging the cards.
@@ -304,9 +281,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
         ),
       );
       try {
-        Overlay.of(context).insert(
-          _overlayEntries[i],
-        ); // Insert the overlay into the overlay stack
+        Overlay.of(context).insert(_overlayEntries[i]); // Insert the overlay into the overlay stack
       } catch (e, st) {
         debugPrint(
           '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[i]}'
@@ -342,15 +317,10 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
                     color: Colors.transparent,
                     child: GestureDetector(
                       onTap: () => _onTap(child),
-                      onPanDown: (details) =>
-                          _onPanDown(details, child), // Handle touch down event
-                      onPanUpdate: (details) =>
-                          _onPanUpdate(details, child), // Handle touch movement
-                      onPanCancel: () => _onPanCancel(
-                        child,
-                      ), // Handle cancellation of the gesture
-                      onPanEnd: (details) =>
-                          _onPanEnd(details), // Handle end of the gesture
+                      onPanDown: (details) => _onPanDown(details, child), // Handle touch down event
+                      onPanUpdate: (details) => _onPanUpdate(details, child), // Handle touch movement
+                      onPanCancel: () => _onPanCancel(child), // Handle cancellation of the gesture
+                      onPanEnd: (details) => _onPanEnd(details), // Handle end of the gesture
                       child: child,
                     ),
                   ),
@@ -364,23 +334,17 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   }
 
   void pauseAutoPlayTemporarily() {
-    bool activeTimerPresent =
-        _controller._resumeAutoPlayTimer?.isActive ?? false;
+    bool activeTimerPresent = _controller._resumeAutoPlayTimer?.isActive ?? false;
     if (activeTimerPresent ||
-        (_controller._autoPlay &&
-            _controller._pauseAutoPlayDurationAfterPressingSideElements !=
-                Duration.zero)) {
+        (_controller._autoPlay && _controller._pauseAutoPlayDurationAfterPressingSideElements != Duration.zero)) {
       // Cancel any previous scheduled resume
       _controller._resumeAutoPlayTimer?.cancel();
       _controller.stopAutoPlay();
 
-      _controller._resumeAutoPlayTimer = Timer(
-        _controller._pauseAutoPlayDurationAfterPressingSideElements,
-        () {
-          _controller.startAutoPlay();
-          _controller._resumeAutoPlayTimer = null;
-        },
-      );
+      _controller._resumeAutoPlayTimer = Timer(_controller._pauseAutoPlayDurationAfterPressingSideElements, () {
+        _controller.startAutoPlay();
+        _controller._resumeAutoPlayTimer = null;
+      });
     }
   }
 
@@ -420,42 +384,29 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   void _onPanUpdate(DragUpdateDetails details, Widget child) {
     if (child != _children.last) return;
 
-    _controller.onUserInteractionUpdate(
-      details,
-      widget.params.widgetWidth,
-      widget.params.widgetHeight,
-      widget.params,
-    );
+    _controller.onUserInteractionUpdate(details, widget.params.widgetWidth, widget.params.widgetHeight, widget.params);
   }
 
   /// Handles the start of a swipe gesture
   void _onPanDown(DragDownDetails dragDownDetails, Widget child) {
     if (child != _children.last) return;
-    _controller.onUserInteractionStart(
-      dragDownDetails.globalPosition.dx,
-      dragDownDetails.globalPosition.dy,
-    );
+    _controller.onUserInteractionStart(dragDownDetails.globalPosition.dx, dragDownDetails.globalPosition.dy);
   }
 
   /// Monitor Animation Changes
   void _listenToAnimationChanges(double progress) {
-    if (_controller._animationController.isAnimating ||
-        _controller._isAnimating) {
+    if (_controller._animationController.isAnimating || _controller._isAnimating) {
       // Check if the animation is past halfway both ways and in between
-      if (_controller._animationController.value <
-          0.5 - _controller._swapConfirmationDistance) {
+      if (_controller._animationController.value < 0.5 - _controller._swapConfirmationDistance) {
         _reinsertOverlayEntries([1, 2, 0]);
         currentOrder = [1, 2, 0];
       }
-      if (_controller._animationController.value >
-          0.5 + _controller._swapConfirmationDistance) {
+      if (_controller._animationController.value > 0.5 + _controller._swapConfirmationDistance) {
         _reinsertOverlayEntries([0, 2, 1]);
         currentOrder = [0, 2, 1];
       }
-      if (0.5 - _controller._swapConfirmationDistance <
-              _controller._animationController.value &&
-          _controller._animationController.value <
-              0.5 + _controller._swapConfirmationDistance) {
+      if (0.5 - _controller._swapConfirmationDistance < _controller._animationController.value &&
+          _controller._animationController.value < 0.5 + _controller._swapConfirmationDistance) {
         _reinsertOverlayEntries([0, 1, 2]);
         currentOrder = [0, 1, 2];
       }
@@ -547,22 +498,12 @@ class StackedTrioCarouselParams {
 
   /// The first background widget's padding.
   ///
-  /// This padding is applied only horizontally. To achieve the same effect vertically,
-  /// adjust the widget height accordingly.
-  ///
-  /// ```dart
-  /// const EdgeInsets.symmetric(horizontal: 8.0)
-  /// ```
+  /// Use `EdgeInsets.only(...)`, `EdgeInsets.symmtric(...)` is obselete
   final EdgeInsets firstWidgetPadding;
 
   /// The second background widget's padding.
   ///
-  /// This padding is applied only horizontally. To achieve the same effect vertically,
-  /// adjust the widget height accordingly.
-  ///
-  /// ```dart
-  /// const EdgeInsets.symmetric(horizontal: 8.0)
-  /// ```
+  /// Use `EdgeInsets.only(...)`, `EdgeInsets.symmtric(...)` is obselete
   final EdgeInsets secondWidgetPadding;
 
   /// Disappear duration.
@@ -594,22 +535,10 @@ class StackedTrioCarouselParams {
     this.angle = 0,
     this.appearDuration = const Duration(milliseconds: 275),
     this.disappearDuration = const Duration(milliseconds: 50),
-  }) : assert(
-         scaleRatio > 0 && scaleRatio < 1,
-         "Scale ratio should be greater than 0 and smaller than 1",
-       ),
-       assert(
-         minimumOpacity >= 0 && minimumOpacity <= 1,
-         "Minimum opacity value should be between 0 and 1",
-       ),
-       assert(
-         maximumOpacity >= 0 && maximumOpacity <= 1,
-         "Maximum opacity value should be between 0 and 1",
-       ),
-       assert(
-         maximumOpacity > minimumOpacity,
-         "Maximum opacity value should be bigger than minimum opacity value",
-       );
+  }) : assert(scaleRatio > 0 && scaleRatio < 1, "Scale ratio should be greater than 0 and smaller than 1"),
+       assert(minimumOpacity >= 0 && minimumOpacity <= 1, "Minimum opacity value should be between 0 and 1"),
+       assert(maximumOpacity >= 0 && maximumOpacity <= 1, "Maximum opacity value should be between 0 and 1"),
+       assert(maximumOpacity > minimumOpacity, "Maximum opacity value should be bigger than minimum opacity value");
 
   @override
   bool operator ==(Object other) {
