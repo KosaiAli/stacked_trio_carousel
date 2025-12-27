@@ -353,3 +353,8 @@ You can interact with the back layer widgets by tapping on them to bring them to
 - For a full example, check out the [Example page](https://pub.dev/packages/stacked_trio_carousel/example).
 
 - For more advanced and visually rich animation examples, check out the [Gift Cards Example](https://github.com/KosaiAli/stacked_trio_carousel/tree/main/example/lib/gift_cards_example.dart) and the [Yu-Gi-Oh Cards Example](https://github.com/KosaiAli/stacked_trio_carousel/tree/main/example/lib/yu_gi_oh_cards_example.dart) on [Github](https://github.com/KosaiAli/stacked_trio_carousel)
+
+<div style="display: flex; justify-content: space-around;">
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/yu_gi_oh.gif" width="300"/>
+  <img src="https://raw.githubusercontent.com/KosaiAli/stacked_trio_carousel/refs/heads/main/doc/gift_cards.gif" width="300"/>
+</div>
