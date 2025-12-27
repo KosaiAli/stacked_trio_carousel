@@ -20,10 +20,7 @@ class MyApp extends StatelessWidget {
       navigatorObservers: [routeObserver],
       debugShowCheckedModeBanner: false,
       title: 'Stacked Trio Carousel Example',
-      theme: ThemeData(
-        colorScheme: const ColorScheme.dark(primary: Colors.grey),
-        useMaterial3: true,
-      ),
+      theme: ThemeData(colorScheme: const ColorScheme.dark(primary: Colors.grey), useMaterial3: true),
       // Switch between examples //
       home: const MyHomePage(),
       // home: const GiftCardsExample(),
@@ -44,11 +41,24 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    // _carouselController = StackedTrioCarouselController(
+    //   tickerProvider: this,
+    //   // animationDuration: const Duration(seconds: 1),
+    //   // autoPlayInterval: const Duration(seconds: 2),
+    //   swipingDirection: .rtl,
+    //   animationCurve: Curves.easeIn,
+    // );
     _carouselController = StackedTrioCarouselController(
       tickerProvider: this,
-      animationDuration: const Duration(seconds: 5),
-      swipingDirection: .rtl,
-      animationCurve: Curves.easeIn,
+      swipingDirection: .ltr,
+      pauseAutoPlayDurationAfterPressingSideElements: const Duration(seconds: 3),
+      animationDuration: const Duration(milliseconds: 1500),
+      autoPlayInterval: const Duration(seconds: 2),
+      adaptAutoPlayDirectionToUserSwipeDirection: true,
+      // Use a single-direction curve, symmetry is handled automatically.
+      animationCurve: Curves.decelerate,
+      swipeSensitivity: 0.5,
+      swapConfirmationDistance: 0.2,
     );
     super.initState();
   }
@@ -57,16 +67,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final List colors = [
       // Colors.transparent,
-      Colors.orange,
-      Colors.blue,
       Colors.red,
       Colors.green,
+      Colors.blue,
+      Colors.orange,
     ];
     return Theme(
-      data: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      data: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple), useMaterial3: true),
       child: Scaffold(
         appBar: AppBar(centerTitle: true, elevation: 2, title: const Text("STC Example")),
         body: Column(
@@ -80,18 +87,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               controller: _carouselController,
               initialIndex: 1,
               onTap: (index) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SecondScreen()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const SecondScreen()));
               },
               children: colors
                   .map(
                     (color) => Container(
                       key: ValueKey(Random().nextInt(100000)),
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(25),
+                      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(25)),
+                      child: Center(
+                        child: Text(
+                          (colors.indexOf(color) + 1).toString(),
+                          style: const TextStyle(color: Colors.black, fontSize: 48, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   )
@@ -99,14 +106,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
             ElevatedButton(
               onPressed: () {
-                _carouselController.autoPlay
-                    ? _carouselController.stopAutoPlay()
-                    : _carouselController.startAutoPlay();
+                _carouselController.autoPlay ? _carouselController.stopAutoPlay() : _carouselController.startAutoPlay();
                 setState(() {});
               },
-              child: Text(
-                _carouselController.autoPlay ? "Stop Auto Play" : "Start Auto Play",
-              ),
+              child: Text(_carouselController.autoPlay ? "Stop Auto Play" : "Start Auto Play"),
             ),
           ],
         ),
@@ -121,16 +124,9 @@ class SecondScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      data: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple), useMaterial3: true),
       child: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          elevation: 2,
-          title: const Text('second screen'),
-        ),
+        appBar: AppBar(centerTitle: true, elevation: 2, title: const Text('second screen')),
         body: const Center(child: Text('second screen')),
       ),
     );
