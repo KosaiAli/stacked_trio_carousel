@@ -19,7 +19,8 @@ class StackedTrioCarousel extends StatefulWidget {
     this.onTap,
     this.height,
     this.width,
-  }) : assert(children.length == 3, "the children list should contain exactly 3 items."),
+    this.initialIndex = 0,
+  }) : assert(children.length > 2, "the children list should contain 3 items at least."),
        assert(
          children.every((c) => c.key != null && c.key is ValueKey) &&
              children.map((c) => c.key).toSet().length == children.length,
@@ -73,6 +74,12 @@ class StackedTrioCarousel extends StatefulWidget {
   /// make sure to specify this value for the widget to behave probably
   /// espically inside row and horizontal list view
   final double? width;
+
+  /// The initial index of the item to be displayed.
+  ///
+  /// The item that shows up in the beginning
+  final int initialIndex;
+
   @override
   State<StackedTrioCarousel> createState() => _StackedTrioCarouselState();
 }
@@ -101,6 +108,10 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
   // Store the gloabl offset of the widget
   Offset _offset = Offset.zero;
 
+  late List<Widget> _slidingWindow;
+
+  late int _currentIndex;
+
   @protected
   void _handleAnimationStart() {
     /* Might Come in Handy Later */
@@ -122,6 +133,12 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
       RenderBox? renderBox = context.findRenderObject() as RenderBox?;
       _offset = renderBox!.localToGlobal(Offset.zero);
     });
+    _currentIndex = widget.initialIndex;
+    _slidingWindow = [
+      _children[(widget.initialIndex - 1) % _children.length],
+      _children[(widget.initialIndex + 1) % _children.length],
+      _children[widget.initialIndex % _children.length],
+    ];
 
     super.initState();
   }
@@ -134,7 +151,12 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
             entry.remove(); // Remove mounted overlay entries
           }
         }
-        _controller.initializeAnimations(params: widget.params, widgetSize: size, widgetOffset: _offset);
+        _controller.initializeAnimations(
+          params: widget.params,
+          widgetSize: size,
+          widgetOffset: _offset,
+          childrenLength: _children.length,
+        );
       } catch (e, st) {
         debugPrint(
           '[StackedTrioCarousel:initState] Failed to initialize layout or animations.\n'
@@ -187,6 +209,14 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
         );
       }
     }
+  }
+
+  void _updateSlidingWindow() {
+    _slidingWindow = [
+      _children[(_currentIndex - 1) % _children.length],
+      _children[(_currentIndex + 1) % _children.length],
+      _children[_currentIndex % _children.length],
+    ];
   }
 
   bool _sameChildren(List<Widget> a, List<Widget> b) {
@@ -260,9 +290,11 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
   void _listenToAnimationEnd(bool finishedAtZero) {
     _removeOverlayEntries();
     if (finishedAtZero) {
-      _children.insert(2, _children.removeAt(0));
+      _currentIndex--;
+      // _children.insert(_children.length - 1, _children.removeAt(0));
     } else {
-      _children.insert(0, _children.removeLast());
+      _currentIndex++;
+      // _children.insert(0, _children.removeLast());
     }
     _generateStackedCards();
   }
@@ -277,7 +309,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
           _controller.positionAnimations[i],
           _controller.opacityAnimations[i],
           _controller.scaleAnimations[i],
-          _children[i],
+          _slidingWindow[i],
         ),
       );
       try {
@@ -376,20 +408,20 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
 
   /// Handles the cancellation of a swipe gesture
   void _onPanCancel(Widget child) {
-    if (child != _children.last) return;
+    if (child != _slidingWindow.last) return;
     _controller.onUserInteractionCancel();
   }
 
   /// Handles the update of a swipe gesture
   void _onPanUpdate(DragUpdateDetails details, Widget child) {
-    if (child != _children.last) return;
+    if (child != _slidingWindow.last) return;
 
     _controller.onUserInteractionUpdate(details, widget.params.widgetWidth, widget.params.widgetHeight, widget.params);
   }
 
   /// Handles the start of a swipe gesture
   void _onPanDown(DragDownDetails dragDownDetails, Widget child) {
-    if (child != _children.last) return;
+    if (child != _slidingWindow.last) return;
     _controller.onUserInteractionStart(dragDownDetails.globalPosition.dx, dragDownDetails.globalPosition.dy);
   }
 
@@ -398,11 +430,15 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel> with TickerPr
     if (_controller._animationController.isAnimating || _controller._isAnimating) {
       // Check if the animation is past halfway both ways and in between
       if (_controller._animationController.value < 0.5 - _controller._swapConfirmationDistance) {
+        _currentIndex--;
         _reinsertOverlayEntries([1, 2, 0]);
+        _updateSlidingWindow();
         currentOrder = [1, 2, 0];
       }
       if (_controller._animationController.value > 0.5 + _controller._swapConfirmationDistance) {
+        _currentIndex++;
         _reinsertOverlayEntries([0, 2, 1]);
+        _updateSlidingWindow();
         currentOrder = [0, 2, 1];
       }
       if (0.5 - _controller._swapConfirmationDistance < _controller._animationController.value &&

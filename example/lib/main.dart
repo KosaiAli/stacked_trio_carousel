@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:example/gift_cards_example.dart';
 import 'package:example/yu_gi_oh_cards_example.dart';
 import 'package:flutter/material.dart';
@@ -36,16 +38,16 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   late StackedTrioCarouselController _carouselController;
-  
+
   @override
   void initState() {
-    _carouselController = StackedTrioCarouselController(tickerProvider: this);
+    _carouselController = StackedTrioCarouselController(tickerProvider: this, autoPlay: false);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final List colors = [Colors.red, Colors.green, Colors.blue];
+    final List colors = [Colors.transparent, Colors.transparent, Colors.blue, Colors.orange, Colors.purple];
     return Theme(
       data: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple), useMaterial3: true),
       child: Scaffold(
@@ -59,13 +61,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               params: StackedTrioCarouselParams(widgetHeight: 200, widgetWidth: 200),
               routeObserver: routeObserver,
               controller: _carouselController,
+              initialIndex: 1,
               onTap: (index) {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const SecondScreen()));
               },
               children: colors
                   .map(
                     (color) => Container(
-                      key: ValueKey(color),
+                      key: ValueKey(Random().nextInt(100000)),
                       decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(25)),
                     ),
                   )

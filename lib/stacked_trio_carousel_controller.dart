@@ -118,24 +118,19 @@ class StackedTrioCarouselController {
   /// ### User interaction
   /// - [swipeSensitivity]: How sensitive swipe gestures are.
   /// - [swapConfirmationDistance]: Percentage of distance from the center required to confirm a swap.
-  /// 
+  ///
   StackedTrioCarouselController({
     required TickerProvider tickerProvider,
     this.animationDuration = const Duration(seconds: 1),
     this.autoPlayInterval = const Duration(seconds: 3),
-    Duration pauseAutoPlayDurationAfterPressingSideElements = const Duration(
-      seconds: 1,
-    ),
+    Duration pauseAutoPlayDurationAfterPressingSideElements = const Duration(seconds: 1),
     SwipingDirection swipingDirection = SwipingDirection.rtl,
     bool autoPlay = true,
     Curve animationCurve = Curves.linear,
     bool adaptAutoPlayDirectionToUserSwipeDirection = true,
     double swipeSensitivity = 0.5,
     double swapConfirmationDistance = 0.5,
-  }) : assert(
-         swipeSensitivity >= 0.1,
-         "Swipe sensitivity should be greater than 0.1",
-       ),
+  }) : assert(swipeSensitivity >= 0.1, "Swipe sensitivity should be greater than 0.1"),
        assert(
          0.95 >= swapConfirmationDistance && swapConfirmationDistance >= 0.05,
          "Swap Confirmation Distance should be greater than 0.05 and smaller than 0.95",
@@ -159,8 +154,7 @@ class StackedTrioCarouselController {
           ..addListener(_animationListener);
 
     _autoPlay = autoPlay;
-    _adaptAutoPlayDirectionToUserSwipe =
-        adaptAutoPlayDirectionToUserSwipeDirection;
+    _adaptAutoPlayDirectionToUserSwipe = adaptAutoPlayDirectionToUserSwipeDirection;
     if (_autoPlay) {
       startAutoPlay();
       _swipingMethod = SwipingMethod.animationDriven;
@@ -197,20 +191,15 @@ class StackedTrioCarouselController {
     required StackedTrioCarouselParams params,
     required Size widgetSize,
     required Offset widgetOffset,
+    required int childrenLength,
   }) {
     final xCenterPoint = (widgetSize.width - params.widgetWidth) / 2;
     final yCenterPoint = (widgetSize.height - params.widgetHeight) / 2;
     _centerPoint = Offset(xCenterPoint, yCenterPoint);
 
-    final firstPos = _firstCardPosition(
-      padding: params.firstWidgetPadding,
-      angle: params.angle,
-    );
+    final firstPos = _firstCardPosition(padding: params.firstWidgetPadding, angle: params.angle);
 
-    final secondPos = _secondCardPosition(
-      padding: params.secondWidgetPadding,
-      angle: params.angle,
-    );
+    final secondPos = _secondCardPosition(padding: params.secondWidgetPadding, angle: params.angle);
 
     final thirdPos = _centerPoint;
 
@@ -226,12 +215,7 @@ class StackedTrioCarouselController {
           tween: Tween(begin: firstPos, end: secondPos),
           weight: 50,
         ),
-      ]).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: normalizedAnimationCurve,
-        ),
-      ),
+      ]).animate(CurvedAnimation(parent: _animationController, curve: normalizedAnimationCurve)),
       TweenSequence<Offset>([
         TweenSequenceItem(
           tween: Tween(begin: firstPos, end: secondPos),
@@ -241,12 +225,7 @@ class StackedTrioCarouselController {
           tween: Tween(begin: secondPos, end: thirdPos),
           weight: 50,
         ),
-      ]).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: normalizedAnimationCurve,
-        ),
-      ),
+      ]).animate(CurvedAnimation(parent: _animationController, curve: normalizedAnimationCurve)),
       TweenSequence<Offset>([
         TweenSequenceItem(
           tween: Tween(begin: secondPos, end: thirdPos),
@@ -256,151 +235,88 @@ class StackedTrioCarouselController {
           tween: Tween(begin: thirdPos, end: firstPos),
           weight: 50,
         ),
-      ]).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: normalizedAnimationCurve,
-        ),
-      ),
+      ]).animate(CurvedAnimation(parent: _animationController, curve: normalizedAnimationCurve)),
     ];
 
     scaleAnimations = [
       TweenSequence<double>([
-        TweenSequenceItem(
-          tween: Tween(begin: 1.0, end: params.scaleRatio),
-          weight: 50,
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: params.scaleRatio), weight: 50),
+        if (childrenLength > 3)...[
+          TweenSequenceItem(
+          tween: Tween(begin: params.scaleRatio, end: 0.0),
+          weight: 25,
         ),
         TweenSequenceItem(
+          tween: Tween(begin: 0.0, end: params.scaleRatio),
+          weight: 25,
+        ),
+        ]
+        else...[
+          TweenSequenceItem(
           tween: Tween(begin: params.scaleRatio, end: params.scaleRatio),
           weight: 50,
         ),
-      ]).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: normalizedAnimationCurve,
-        ),
-      ),
+        ]
+      ]).animate(CurvedAnimation(parent: _animationController, curve: normalizedAnimationCurve)),
       TweenSequence<double>([
         TweenSequenceItem(
           tween: Tween(begin: params.scaleRatio, end: params.scaleRatio),
           weight: 50,
         ),
-        TweenSequenceItem(
-          tween: Tween(begin: params.scaleRatio, end: 1.0),
-          weight: 50,
-        ),
-      ]).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: normalizedAnimationCurve,
-        ),
-      ),
+        TweenSequenceItem(tween: Tween(begin: params.scaleRatio, end: 1.0), weight: 50),
+      ]).animate(CurvedAnimation(parent: _animationController, curve: normalizedAnimationCurve)),
       TweenSequence<double>([
-        TweenSequenceItem(
-          tween: Tween(begin: params.scaleRatio, end: 1.0),
-          weight: 50,
-        ),
-        TweenSequenceItem(
-          tween: Tween(begin: 1.0, end: params.scaleRatio),
-          weight: 50,
-        ),
-      ]).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: normalizedAnimationCurve,
-        ),
-      ),
+        TweenSequenceItem(tween: Tween(begin: params.scaleRatio, end: 1.0), weight: 50),
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: params.scaleRatio), weight: 50),
+      ]).animate(CurvedAnimation(parent: _animationController, curve: normalizedAnimationCurve)),
     ];
 
     opacityAnimations = [
       TweenSequence<double>([
         TweenSequenceItem(
-          tween: Tween(
-            begin: params.maximumOpacity,
-            end: params.minimumOpacity,
-          ),
+          tween: Tween(begin: params.maximumOpacity, end: params.minimumOpacity),
           weight: 50,
         ),
         TweenSequenceItem(
-          tween: Tween(
-            begin: params.minimumOpacity,
-            end: params.minimumOpacity,
-          ),
+          tween: Tween(begin: params.minimumOpacity, end: params.minimumOpacity),
           weight: 50,
         ),
-      ]).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: normalizedAnimationCurve,
-        ),
-      ),
+      ]).animate(CurvedAnimation(parent: _animationController, curve: normalizedAnimationCurve)),
       TweenSequence<double>([
         TweenSequenceItem(
-          tween: Tween(
-            begin: params.minimumOpacity,
-            end: params.minimumOpacity,
-          ),
+          tween: Tween(begin: params.minimumOpacity, end: params.minimumOpacity),
           weight: 50,
         ),
         TweenSequenceItem(
-          tween: Tween(
-            begin: params.minimumOpacity,
-            end: params.maximumOpacity,
-          ),
+          tween: Tween(begin: params.minimumOpacity, end: params.maximumOpacity),
           weight: 50,
         ),
-      ]).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: normalizedAnimationCurve,
-        ),
-      ),
+      ]).animate(CurvedAnimation(parent: _animationController, curve: normalizedAnimationCurve)),
       TweenSequence<double>([
         TweenSequenceItem(
-          tween: Tween(
-            begin: params.minimumOpacity,
-            end: params.maximumOpacity,
-          ),
+          tween: Tween(begin: params.minimumOpacity, end: params.maximumOpacity),
           weight: 50,
         ),
         TweenSequenceItem(
-          tween: Tween(
-            begin: params.maximumOpacity,
-            end: params.minimumOpacity,
-          ),
+          tween: Tween(begin: params.maximumOpacity, end: params.minimumOpacity),
           weight: 50,
         ),
-      ]).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: normalizedAnimationCurve,
-        ),
-      ),
+      ]).animate(CurvedAnimation(parent: _animationController, curve: normalizedAnimationCurve)),
     ];
   }
 
   /// Helper to calculate the position of the first card
-  Offset _firstCardPosition({
-    required EdgeInsets padding,
-    required double angle,
-  }) {
-    final xCord =
-        _centerPoint.dx * (1 - math.cos(angle)) + padding.left - padding.right;
-    final yCord =
-        _centerPoint.dy * (1 - math.sin(angle)) + padding.top - padding.bottom;
+  Offset _firstCardPosition({required EdgeInsets padding, required double angle}) {
+    final xCord = _centerPoint.dx * (1 - math.cos(angle)) + padding.left - padding.right;
+    final yCord = _centerPoint.dy * (1 - math.sin(angle)) + padding.top - padding.bottom;
 
     return Offset(xCord, yCord);
   }
 
   /// Helper to calculate the position of the second card
-  Offset _secondCardPosition({
-    required EdgeInsets padding,
-    required double angle,
-  }) {
-    final xCord =
-        _centerPoint.dx * (1 + math.cos(angle)) + padding.left - padding.right;
-    final yCord =
-        _centerPoint.dy * (1 + math.sin(angle)) + padding.top - padding.bottom;
+  Offset _secondCardPosition({required EdgeInsets padding, required double angle}) {
+    final xCord = _centerPoint.dx * (1 + math.cos(angle)) + padding.left - padding.right;
+    final yCord = _centerPoint.dy * (1 + math.sin(angle)) + padding.top - padding.bottom;
 
     return Offset(xCord, yCord);
   }
@@ -409,9 +325,7 @@ class StackedTrioCarouselController {
   void startAutoPlay() {
     _stopTimer(); // Ensure no duplicate timers
     _timer = Timer.periodic(autoPlayInterval, (_) {
-      _swipingDirection == SwipingDirection.rtl
-          ? next()
-          : previous(); // Automatically move to the next card
+      _swipingDirection == SwipingDirection.rtl ? next() : previous(); // Automatically move to the next card
     });
     // resume autoplay behaviour
     _autoPlay = true;
@@ -450,10 +364,7 @@ class StackedTrioCarouselController {
   }
 
   /// Prepares for user interaction by stopping animations and auto-play
-  void onUserInteractionStart(
-    double swipeStartingPointdx,
-    double swipeStartingPointdy,
-  ) {
+  void onUserInteractionStart(double swipeStartingPointdx, double swipeStartingPointdy) {
     _stopTimer();
     stopAnimation();
     _swipeStartingPointdx = swipeStartingPointdx;
@@ -473,8 +384,7 @@ class StackedTrioCarouselController {
     final dx = details.globalPosition.dx - _swipeStartingPointdx!;
     final dy = details.globalPosition.dy - _swipeStartingPointdy!;
 
-    final projectedDelta =
-        dx * math.cos(params.angle) + dy * math.sin(params.angle);
+    final projectedDelta = dx * math.cos(params.angle) + dy * math.sin(params.angle);
 
     double reference;
 
