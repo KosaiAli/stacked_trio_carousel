@@ -15,12 +15,14 @@ class _YuGiOhCardsExampleState extends State<YuGiOhCardsExample>
     "https://static.wikia.nocookie.net/yugioh/images/f/f5/TheWingedDragonofRa-KICO-EN-UR-1E.png/revision/latest?cb=20220328162837",
     "https://static.wikia.nocookie.net/yugioh/images/e/ef/ObelisktheTormentor-KICO-EN-UR-1E.png/revision/latest?cb=20220328162813",
     "https://static.wikia.nocookie.net/yugioh/images/f/f2/SlifertheSkyDragon-SBC1-EN-ScR-1E.png/revision/latest/scale-to-width-down/284?cb=20230919232542",
+    "https://static.wikia.nocookie.net/yugioh/images/2/29/ExxodMasterofTheGuard-WCPP-EN-R-LE.png/revision/latest?cb=20230628090613"
   ];
 
   final List _titles = [
     "The Winged Dragon of Ra",
     "Obelisk the Tormentor",
     "Slifer the Sky Dragon",
+    "Exxod, Master of The Guard"
   ];
 
   late StackedTrioCarouselController _carouselController;

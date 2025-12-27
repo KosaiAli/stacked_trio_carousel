@@ -10,19 +10,15 @@ class GiftCardsExample extends StatefulWidget {
   State<GiftCardsExample> createState() => _GiftCardsExampleState();
 }
 
-class _GiftCardsExampleState extends State<GiftCardsExample>
-    with TickerProviderStateMixin {
+class _GiftCardsExampleState extends State<GiftCardsExample> with TickerProviderStateMixin {
   final List _images = [
     "https://cdn.coinsbee.com/dist/assets/img/brands/Amazon.webp",
     "https://cdn.coinsbee.com/dist/assets/img/brands/Netflix.webp",
     "https://cdn.coinsbee.com/dist/assets/img/brands/Steam.webp",
+    "https://cdn.coinsbee.com/dist/assets/img/brands/Airbnb.webp",
   ];
 
-  final List _titles = [
-    "Amazon Gift Card",
-    "Netflix Gift Card",
-    "Steam Gift Card",
-  ];
+  final List _titles = ["Amazon Gift Card", "Netflix Gift Card", "Steam Gift Card", "Airbnb Gift Card"];
 
   late AnimationController _scalecontroller;
   late Animation<double> _scaleAnimation;
@@ -36,9 +32,7 @@ class _GiftCardsExampleState extends State<GiftCardsExample>
     _carouselController = StackedTrioCarouselController(
       tickerProvider: this,
       swipingDirection: .ltr,
-      pauseAutoPlayDurationAfterPressingSideElements: const Duration(
-        seconds: 3,
-      ),
+      pauseAutoPlayDurationAfterPressingSideElements: const Duration(seconds: 3),
       animationDuration: const Duration(milliseconds: 1500),
       autoPlayInterval: const Duration(milliseconds: 2500),
       adaptAutoPlayDirectionToUserSwipeDirection: true,
@@ -48,17 +42,13 @@ class _GiftCardsExampleState extends State<GiftCardsExample>
       swapConfirmationDistance: 0.2,
     );
 
-    _scalecontroller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
+    _scalecontroller = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
 
     _scaleAnimation =
-        Tween<double>(begin: 1.0, end: 1.25).animate(
-          CurvedAnimation(parent: _scalecontroller, curve: Curves.easeInOut),
-        )..addListener(() {
-          setState(() {});
-        });
+        Tween<double>(begin: 1.0, end: 1.25).animate(CurvedAnimation(parent: _scalecontroller, curve: Curves.easeInOut))
+          ..addListener(() {
+            setState(() {});
+          });
 
     super.initState();
   }
@@ -82,11 +72,7 @@ class _GiftCardsExampleState extends State<GiftCardsExample>
         backgroundColor: Colors.grey.shade900,
         title: const Text(
           "STC - Gift Cards Example",
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       body: Column(
@@ -99,18 +85,8 @@ class _GiftCardsExampleState extends State<GiftCardsExample>
               widgetHeight: 220 * _scaleAnimation.value,
               widgetWidth: 330 * _scaleAnimation.value,
               angle: pi / 2,
-              firstWidgetPadding: EdgeInsets.only(
-                top: 20 + 80 * _scalecontroller.value,
-                right: 0,
-                left: 0,
-                bottom: 0,
-              ),
-              secondWidgetPadding: EdgeInsets.only(
-                top: 0,
-                right: 0,
-                left: 0,
-                bottom: 20 + 80 * _scalecontroller.value,
-              ),
+              firstWidgetPadding: EdgeInsets.only(top: 20 + 80 * _scalecontroller.value, right: 0, left: 0, bottom: 0),
+              secondWidgetPadding: EdgeInsets.only(top: 0, right: 0, left: 0, bottom: 20 + 80 * _scalecontroller.value),
               scaleRatio: 0.68,
               minimumOpacity: 0.4,
             ),
@@ -120,9 +96,7 @@ class _GiftCardsExampleState extends State<GiftCardsExample>
               _toggleScale();
               await showModalBottomSheet(
                 context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
                 builder: (BuildContext context) {
                   return SizedBox(
                     height: 300,
@@ -132,24 +106,12 @@ class _GiftCardsExampleState extends State<GiftCardsExample>
                         children: [
                           Text(
                             'Buy ${(index + 1) * 10}\$ ${_titles[index]}?',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                           ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey,
-                            ),
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
                             onPressed: () => Navigator.pop(context),
-                            child: const Text(
-                              'Proceed',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                              ),
-                            ),
+                            child: const Text('Proceed', style: TextStyle(color: Colors.white, fontSize: 18)),
                           ),
                         ],
                       ),
@@ -168,8 +130,7 @@ class _GiftCardsExampleState extends State<GiftCardsExample>
                       image,
                       height: 100,
                       width: 200,
-                      fit: BoxFit
-                          .cover, // Ensures the image fills the 500x500 area
+                      fit: BoxFit.cover, // Ensures the image fills the 500x500 area
                     ),
                   ),
                 )
