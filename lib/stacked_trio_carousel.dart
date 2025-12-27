@@ -121,8 +121,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   @override
   void initState() {
     _controller =
-        widget.controller ??
-        StackedTrioCarouselController(tickerProvider: this);
+        widget.controller ?? StackedTrioCarouselController(tickerProvider: this);
 
     _controller.onAnimationStart = _handleAnimationStart;
     _controller.onAnimationEnd = _listenToAnimationEnd;
@@ -246,8 +245,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
       _children = List.from(widget.children);
     }
     bool shouldReinitialize =
-        (oldWidget.height == widget.height &&
-            oldWidget.width == widget.width) &&
+        (oldWidget.height == widget.height && oldWidget.width == widget.width) &&
         (!_sameChildren(oldWidget.children, widget.children) ||
             (oldWidget.params != widget.params));
 
@@ -293,8 +291,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
       () {},
     );
 
-    super
-        .didPushNext(); // Call the superclass method to ensure proper functionality
+    super.didPushNext(); // Call the superclass method to ensure proper functionality
   }
 
   /// Rearranging the cards.
@@ -307,11 +304,10 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
     _removeOverlayEntries();
     if (finishedAtZero) {
       _currentIndex--;
-      // _children.insert(_children.length - 1, _children.removeAt(0));
     } else {
       _currentIndex++;
-      // _children.insert(0, _children.removeLast());
     }
+    _updateSlidingWindow();
     _generateStackedCards();
   }
 
@@ -329,9 +325,9 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
         ),
       );
       try {
-        Overlay.of(context).insert(
-          _overlayEntries[i],
-        ); // Insert the overlay into the overlay stack
+        Overlay.of(
+          context,
+        ).insert(_overlayEntries[i]); // Insert the overlay into the overlay stack
       } catch (e, st) {
         debugPrint(
           '[StackedTrioCarousel:OverlayEntries] Failed to insert entry: ${_overlayEntries[i]}'
@@ -371,9 +367,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
                           _onPanDown(details, child), // Handle touch down event
                       onPanUpdate: (details) =>
                           _onPanUpdate(details, child), // Handle touch movement
-                      onPanCancel: () => _onPanCancel(
-                        child,
-                      ), // Handle cancellation of the gesture
+                      onPanCancel: () =>
+                          _onPanCancel(child), // Handle cancellation of the gesture
                       onPanEnd: (details) =>
                           _onPanEnd(details), // Handle end of the gesture
                       child: child,
@@ -389,8 +384,7 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   }
 
   void pauseAutoPlayTemporarily() {
-    bool activeTimerPresent =
-        _controller._resumeAutoPlayTimer?.isActive ?? false;
+    bool activeTimerPresent = _controller._resumeAutoPlayTimer?.isActive ?? false;
     if (activeTimerPresent ||
         (_controller._autoPlay &&
             _controller._pauseAutoPlayDurationAfterPressingSideElements !=
@@ -411,8 +405,8 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
 
   /// Bring non-main element to center if pressed, and run defined onTap logic on main element
   Future<void> _onTap(Widget child) async {
-    int index = _children.indexOf(child);
-    if (child != _children.last) {
+    int index = _slidingWindow.indexOf(child);
+    if (child != _slidingWindow.last) {
       if (index < 2) {
         index == 0 ? await _controller.previous() : await _controller.next();
         pauseAutoPlayTemporarily();
@@ -456,26 +450,46 @@ class _StackedTrioCarouselState extends State<StackedTrioCarousel>
   /// Handles the start of a swipe gesture
   void _onPanDown(DragDownDetails dragDownDetails, Widget child) {
     if (child != _slidingWindow.last) return;
-    _controller.onUserInteractionStart(dragDownDetails.globalPosition.dx, dragDownDetails.globalPosition.dy);
+    _controller.onUserInteractionStart(
+      dragDownDetails.globalPosition.dx,
+      dragDownDetails.globalPosition.dy,
+    );
   }
 
   /// Monitor Animation Changes
   void _listenToAnimationChanges(double progress) {
-    if (_controller._animationController.isAnimating ||
-        _controller._isAnimating) {
+    if (_controller._animationController.isAnimating || _controller._isAnimating) {
       // Check if the animation is past halfway both ways and in between
-      if (_controller._animationController.value < 0.5 - _controller._swapConfirmationDistance) {
-        _currentIndex--;
+      if (_controller._animationController.value <
+          0.5 - _controller._swapConfirmationDistance) {
+        if (!listEquals(currentOrder, [1, 2, 0]) && _children.length > 3) {
+          _overlayEntries[1].remove();
+          _overlayEntries[1] = _createOverlayEntry(
+            _controller.positionAnimations[1],
+            _controller.opacityAnimations[1],
+            _controller.scaleAnimations[1],
+            _children[(_currentIndex - 2) % _children.length],
+          );
+        }
         _reinsertOverlayEntries([1, 2, 0]);
-        _updateSlidingWindow();
         currentOrder = [1, 2, 0];
       }
-      if (_controller._animationController.value > 0.5 + _controller._swapConfirmationDistance) {
-        _currentIndex++;
+      if (_controller._animationCurve.transform(_controller._animationController.value) >
+          0.70) {
+        if (!listEquals(currentOrder, [0, 2, 1]) && _children.length > 3) {
+          _overlayEntries[0].remove();
+          _overlayEntries[0] = _createOverlayEntry(
+            _controller.positionAnimations[0],
+            _controller.opacityAnimations[0],
+            _controller.scaleAnimations[0],
+            _children[(_currentIndex + 2) % _children.length],
+          );
+        }
         _reinsertOverlayEntries([0, 2, 1]);
-        _updateSlidingWindow();
         currentOrder = [0, 2, 1];
       }
+      if (_controller._animationController.value >
+          0.5 + _controller._swapConfirmationDistance) {}
       if (0.5 - _controller._swapConfirmationDistance <
               _controller._animationController.value &&
           _controller._animationController.value <

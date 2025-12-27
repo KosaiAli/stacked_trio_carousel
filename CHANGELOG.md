@@ -82,3 +82,7 @@
 - Fixed onTap index to return the actual index of the pressed widget
 
 - Usage examples for the package 
+
+## 1.2.1 
+
+- Update README.md
